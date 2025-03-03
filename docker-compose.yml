@@ -1,10 +1,8 @@
-version: '3.1'
+version: '3.8'
 
 services:
-
-  db:
+  postgres:
     image: postgres:latest
-    container_name: postgres-container
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
@@ -12,18 +10,34 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - network
+      - mynetwork
 
   pgadmin:
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_AUTO_SERVER_ADD: 'True'
+      PGADMIN_CONFIG_SERVERS: |
+        {
+          "Servers": {
+            "1": {
+              "Name": "PostgreSQL",
+              "Group": "Servers",
+              "Host": "postgres",
+              "Port": 5432,
+              "Username": "user",
+              "Password": "password",
+              "SSLMode": "prefer"
+            }
+          }
+        }
     ports:
       - "5050:80"
-    depends_on:
-      - db
+    networks:
+      - mynetwork
 
 networks:
-  network:
+  mynetwork:
     driver: bridge

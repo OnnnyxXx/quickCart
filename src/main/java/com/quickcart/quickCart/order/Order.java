@@ -4,11 +4,16 @@ import jakarta.persistence.*;
 import com.quickcart.quickCart.product.Product;
 import com.quickcart.quickCart.store.Store;
 import com.quickcart.quickCart.user.User;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Setter
+@Getter
 @Entity
+@Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,5 +34,4 @@ public class Order {
     private LocalDateTime orderDate;
     private String deliveryAddress;
     private String paymentMethod; // Метод оплаты (например, "Кредитная карта", "Наличные")
-
 }
