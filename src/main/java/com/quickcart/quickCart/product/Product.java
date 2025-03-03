@@ -1,7 +1,8 @@
-package product;
+package com.quickcart.quickCart.product;
 
+import com.quickcart.quickCart.order.Order;
+import com.quickcart.quickCart.store.Store;
 import jakarta.persistence.*;
-import store.Store;
 
 import java.math.BigDecimal;
 
@@ -20,4 +21,8 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "store_id")
     private Store store;
+
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order orderReference;
 }

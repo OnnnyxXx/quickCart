@@ -1,7 +1,7 @@
-package moderation;
+package com.quickcart.quickCart.moderation;
 
 import jakarta.persistence.*;
-import user.User;
+import com.quickcart.quickCart.user.User;
 
 import java.time.LocalDateTime;
 
