@@ -1,7 +1,7 @@
-package store;
+package com.quickcart.quickCart.store;
 
 import jakarta.persistence.*;
-import product.Product;
+import com.quickcart.quickCart.product.Product;
 
 import java.util.List;
 

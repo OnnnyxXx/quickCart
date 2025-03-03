@@ -1,4 +1,4 @@
-package moderation;
+package com.quickcart.quickCart.moderation;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
