@@ -1,13 +1,12 @@
 package com.quickcart.quickCart.user;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class UserService {
@@ -22,24 +21,16 @@ public class UserService {
     }
 
 
-
-    List<UserDTO> users = new ArrayList<>();
-
-    {
-        users.add(new UserDTO("user1", "password1", "user1@example.com", "Location1"));
-        users.add(new UserDTO("user2", "password2", "user2@example.com", "Location2"));
-        users.add(new UserDTO("user3", "password3", "user3@example.com", "Location3"));
-    }
-
-    public List<UserDTO> dtoList() {
-        return users;
-    }
-
-    public ResponseEntity<User> getUserById(Long id) {
+    public ResponseEntity<UserDTO> getUserById(Long id) {
         return userRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build()
-                );
+                .map(user -> {
+                    UserDTO userDTO = new UserDTO();
+                    userDTO.setId(user.getId());
+                    userDTO.setUsername(user.getUsername());
+                    userDTO.setEmail(user.getEmail());
+                    return ResponseEntity.ok(userDTO);
+                })
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     public ResponseEntity<User> createUser(User user) {
@@ -60,11 +51,16 @@ public class UserService {
         return user;
     }
 
-    public ResponseEntity<User> getUserByEmail(String email) {
+    public ResponseEntity<UserDTO> getUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build()
-                );
+                .map(user -> {
+                    UserDTO userDTO = new UserDTO();
+                    userDTO.setId(user.getId());
+                    userDTO.setUsername(user.getUsername());
+                    userDTO.setEmail(user.getEmail());
+                    return ResponseEntity.ok(userDTO);
+                })
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     public ResponseEntity<User> delete(Long id) {
@@ -73,12 +69,16 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<User> updateUser(Long id, User updatedUser) {
-        if (!userRepository.existsById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public void updateUser(UserDTO userDTO) {
+        User user = userRepository.findById(userDTO.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User  not found"));
+        user.setUsername(userDTO.getUsername());
+        user.setEmail(userDTO.getEmail());
+
+        if (userDTO.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         }
-        updatedUser.setId(id);
-        User savedUser = userRepository.save(updatedUser);
-        return ResponseEntity.ok(savedUser);
+        userRepository.save(user);
     }
+
 }
