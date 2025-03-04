@@ -10,6 +10,8 @@ import lombok.Setter;
 @Setter
 public class UserDTO {
 
+    private Long id;
+
     @NotBlank(message = "Username is required")
     @Size(min = 3, max = 20)
     private String username;
@@ -24,9 +26,11 @@ public class UserDTO {
 
     private String location;
 
-    public UserDTO() {}
+    public UserDTO() {
+    }
 
-    public UserDTO(String username, String password, String email, String location) {
+    public UserDTO(Long id, String username, String password, String email, String location) {
+        this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
