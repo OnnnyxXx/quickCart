@@ -3,8 +3,6 @@ package com.quickcart.quickCart.user;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -58,7 +56,8 @@ public class UserService {
         user.setRating(0);
         user.setRole(User.Role.BUYER);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        return userRepository.save(user);
+        userRepository.save(user);
+        return user;
     }
 
     public ResponseEntity<User> getUserByEmail(String email) {
@@ -69,10 +68,6 @@ public class UserService {
     }
 
     public ResponseEntity<User> delete(Long id) {
-        if (!userRepository.existsById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-
-        }
         userRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
