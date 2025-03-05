@@ -3,7 +3,6 @@ package com.quickcart.quickCart.order;
 import com.quickcart.quickCart.user.User;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +21,10 @@ public class OrderController {
     }
     @GetMapping("/{userId}")
     public List<Order> getListOrders(@PathVariable("userId") Long userId){
-        List<Order> listOrders = orderService.getOrderByUserId(userId);
-        return listOrders;
+        return orderService.getOrdersByUserId(userId);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> getOrder(@PathVariable("id") Long id){
+        return orderService.getOrderById(id);
     }
 }

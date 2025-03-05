@@ -36,7 +36,14 @@ public class OrderService {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedOrder);
     }
 
-    public List<Order> getOrderByUserId(Long userId) {
-        return orderRepository.findByUserId(userId)
+    public List<Order> getOrdersByUserId(Long userId) {
+        return orderRepository.findByUserId(userId);
+    }
+
+    public ResponseEntity<Order> getOrderById(Long id) {
+        return orderRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+                );
     }
 }
