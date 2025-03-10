@@ -1,5 +1,7 @@
 package com.quickcart.quickCart.user;
 
+import com.quickcart.quickCart.user.auth.dto.UserDTO;
+import com.quickcart.quickCart.user.auth.dto.UserDtoInfo;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -7,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 @RestController
@@ -21,18 +24,12 @@ public class UserController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable("id") Long id) {
-        return userService.getUserById(id);
-    }
-
-    @PostMapping("/create")
-    public ResponseEntity<User> create(@RequestBody User user) {
-        return userService.createUser(user);
-
+    public Optional<UserDtoInfo> getUserById(@PathVariable("id") Long id) {
+        return userService.getInfoById(id);
     }
 
     @GetMapping("email/{email}")
-    public ResponseEntity<UserDTO> getUserByEmail(@PathVariable("email") String email) {
+    public Optional<UserDtoInfo> getUserByEmail(@PathVariable("email") String email) {
         return userService.getUserByEmail(email);
     }
 
@@ -40,7 +37,8 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> update(@PathVariable("id") Long id,
                                                       @RequestParam(required = false) String name,
                                                       @RequestParam(required = false) String email,
-                                                      @RequestParam(required = false) String password) {
+                                                      @RequestParam(required = false) String password,
+                                                      @RequestParam(required = false) String location) {
         UserDTO userDTO = userService.getUserById(id).getBody();
         Map<String, Object> response = new HashMap<>();
 
@@ -56,6 +54,12 @@ public class UserController {
             userDTO.setEmail(email);
             response.put("email", userDTO.getEmail());
         }
+
+        if (location != null) {
+            userDTO.setLocation(location);
+            response.put("location", userDTO.getLocation());
+        }
+
         if (password != null) {
             userDTO.setPassword(password);
 //            response.put("password", userDTO.getPassword()); не надо его возвращать
