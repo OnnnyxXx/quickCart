@@ -1,5 +1,6 @@
-package com.quickcart.quickCart.user;
+package com.quickcart.quickCart.user.auth.dto;
 
+import com.quickcart.quickCart.user.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -9,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserDTO {
-
+    // Рейтинг???
     private Long id;
 
     @NotBlank(message = "Username is required")
@@ -26,14 +27,17 @@ public class UserDTO {
 
     private String location;
 
+    private User.Role role;
+
     public UserDTO() {
     }
 
-    public UserDTO(Long id, String username, String password, String email, String location) {
+    public UserDTO(Long id, String username, String email, String location, User.Role role) {
         this.id = id;
         this.username = username;
-        this.password = password;
         this.email = email;
         this.location = location;
+        this.role = role;
     }
+
 }
