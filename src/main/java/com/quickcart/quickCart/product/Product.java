@@ -3,10 +3,15 @@ package com.quickcart.quickCart.product;
 import com.quickcart.quickCart.order.Order;
 import com.quickcart.quickCart.store.Store;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
+@Setter
+@Getter
 @Entity
+@Table(name = "products")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
