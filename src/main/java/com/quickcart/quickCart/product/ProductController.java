@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -24,7 +25,7 @@ public class ProductController {
     }
 
     @GetMapping("/stores/{storeId}/products")
-    public List<Product> getProductsByStore(@PathVariable("storeId") Long storeId){
+    public ResponseEntity<List<Product>> getProductsByStore(@PathVariable("storeId") Long storeId){
         return productService.getProductsByStoreId(storeId);
     }
 
@@ -34,10 +35,22 @@ public class ProductController {
     }
 
     @PutMapping("/products/{id}")
-    public ResponseEntity<Product> updateProduct(@Valid @RequestBody Product product, @PathVariable("id") Long id){
-        ResponseEntity<Product> productResponse = productService.getProductById(id);
-        if(productResponse.getStatusCode() == HttpStatus.NOT_FOUND) return productResponse;
+    public ResponseEntity<Product> updateProduct(@PathVariable("id") Long id,
+                                                 @RequestParam(required = false) String name,
+                                                 @RequestParam(required = false) String description,
+                                                 @RequestParam(required = false) BigDecimal price,
+                                                 @RequestParam(required = false) Integer stock,
+                                                 @RequestParam(required = false) String imageUrl,
+                                                 @RequestParam(required = false) String category){
+
+        Product product = productService.getProductById(id).getBody();
+        if(product == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        if(name != null) product.setName(name);
+        if(description != null) product.setDescription(description);
+        if(price != null) product.setPrice(price);
+        if(stock != null) product.setStock(stock);
+        if(imageUrl != null) product.setImageUrl(imageUrl);
+        if(category != null) product.setCategory(category);
         return productService.updateProductById(id, product);
     }
-
 }
