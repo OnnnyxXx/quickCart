@@ -31,14 +31,16 @@ public class ProductService {
 
     public ResponseEntity<Product> createProduct(Product product, Long storeId) {
         Store store = storeService.getStoreById(storeId);
-        product.setStore(store);
+        if(store != null) product.setStore(store);
+        else return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         Product savedProduct = productRepository.save(product);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
     }
 
-    public List<Product> getProductsByStoreId(Long storeId) {
+    public ResponseEntity<List<Product>> getProductsByStoreId(Long storeId) {
         Store store = storeService.getStoreById(storeId);
-        return store.getProducts();
+        if(store == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.ok(store.getProducts());
     }
 
     public ResponseEntity<Product> getProductById(Long id) {
@@ -48,7 +50,7 @@ public class ProductService {
                 );
     }
 
-    @Transactional
+    @Transactional //may be not necessary
     public ResponseEntity<Product> updateProductById(Long id, Product updateProduct) {
         if (!productRepository.existsById(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
