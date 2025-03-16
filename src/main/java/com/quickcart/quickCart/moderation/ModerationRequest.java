@@ -1,10 +1,16 @@
 package com.quickcart.quickCart.moderation;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import com.quickcart.quickCart.user.User;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @Entity
 public class ModerationRequest {
 
@@ -15,9 +21,31 @@ public class ModerationRequest {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user; // Пользователь, который подал заявку
-    private String storeName; // Название магазина
-    private String location; // Локация магазина
-    private String description; // Описание магазина
-    private LocalDateTime requestDate; // Дата подачи заявки
-    private String status; // Статус заявки (например, "На рассмотрении", "Одобрена", "Отклонена")
+
+    @NotBlank(message = "Store name is required")
+    private String storeName;
+
+    @NotBlank(message = "Location is required")
+    private String location;
+
+    @NotBlank(message = "Description is required")
+    @Size(max = 255)
+    private String description;
+
+    @Column(updatable = false)
+    private LocalDateTime requestDate = LocalDateTime.now();
+
+    @Enumerated(EnumType.STRING)
+    private ModerationRequestStatus status; // Статус заявки
+
+    public ModerationRequest(User user, String storeName, String location, String description) {
+        this.user = user;
+        this.storeName = storeName;
+        this.location = location;
+        this.description = description;
+        this.requestDate = LocalDateTime.now();
+        this.status = ModerationRequestStatus.PENDING;
+    }
+
+    public ModerationRequest() {}
 }

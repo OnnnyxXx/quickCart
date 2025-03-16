@@ -1,13 +1,16 @@
 package com.quickcart.quickCart.user;
 
+import com.quickcart.quickCart.user.auth.dto.UserDTO;
+import com.quickcart.quickCart.user.auth.dto.UserDtoInfo;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
+
 
 @Service
 public class UserService {
@@ -21,64 +24,48 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-
-
-    List<UserDTO> users = new ArrayList<>();
-
-    {
-        users.add(new UserDTO("user1", "password1", "user1@example.com", "Location1"));
-        users.add(new UserDTO("user2", "password2", "user2@example.com", "Location2"));
-        users.add(new UserDTO("user3", "password3", "user3@example.com", "Location3"));
-    }
-
-    public List<UserDTO> dtoList() {
-        return users;
-    }
-
-    public ResponseEntity<User> getUserById(Long id) {
+    // Для /update/{id}
+    public ResponseEntity<UserDTO> getUserById(Long id) {
         return userRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build()
-                );
+                .map(user -> {
+                    UserDTO userDTO = new UserDTO();
+                    userDTO.setId(user.getId());
+                    userDTO.setUsername(user.getUsername());
+                    userDTO.setEmail(user.getEmail());
+                    userDTO.setLocation(user.getLocation());
+                    return ResponseEntity.ok(userDTO);
+                })
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    public ResponseEntity<User> createUser(User user) {
-        User savedUser = userRepository.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
+    public Optional<UserDtoInfo> getUserByEmail(String email) {
+        return userRepository.findInfoByEmail(email);
+    }
+
+    public Optional<UserDtoInfo> getInfoById(Long id){
+        return userRepository.findInfoById(id);
     }
 
 
-    public User registerUser(UserDTO userDTO) {
-        User user = new User();
+    @Transactional
+    public void updateUser(UserDTO userDTO) {
+        User user = userRepository.findById(userDTO.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User  not found"));
+
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
         user.setLocation(userDTO.getLocation());
-        user.setRating(0);
-        user.setRole(User.Role.BUYER);
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+
+        if (userDTO.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        }
         userRepository.save(user);
-        return user;
     }
 
-    public ResponseEntity<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build()
-                );
-    }
 
     public ResponseEntity<User> delete(Long id) {
         userRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Transactional
-    public ResponseEntity<User> updateUser(Long id, User updatedUser) {
-        if (!userRepository.existsById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        updatedUser.setId(id);
-        User savedUser = userRepository.save(updatedUser);
-        return ResponseEntity.ok(savedUser);
-    }
 }
