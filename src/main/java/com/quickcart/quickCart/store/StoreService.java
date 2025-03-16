@@ -96,6 +96,10 @@ public class StoreService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Store not found with id " + id));
     }
 
+    public Store getStoreById(Long id){
+        return storeRepository.getReferenceById(id);
+    }
+
     @Transactional
     public HashMap<String, String> updateStore(Long id, StoreDtoUpdate withUserDto) {
         Store store = storeRepository.findById(id)
