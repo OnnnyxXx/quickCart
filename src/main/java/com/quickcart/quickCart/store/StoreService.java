@@ -12,6 +12,8 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -37,7 +39,15 @@ public class StoreService {
     }
 
     public void registerStore(StoreDTO storeDTO) {
-        Optional<User> currentUser = userRepository.findById(storeDTO.getUserId());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = authentication.getName();
+
+        Optional<User> currentUserOP = userRepository.findByEmail(currentUserEmail);
+        if (currentUserOP.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Пользователь не авторизован.");
+        }
+
+        User currentUser = currentUserOP.get();
         String storeName = storeDTO.getName();
         ModerationRequestStatus status = moderationRequestDao.getStatusByStoreName(storeName);
 
@@ -45,13 +55,13 @@ public class StoreService {
             logger.warn("Попытка регистрации магазина с активной заявкой на модерацию: {}", storeName);
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Существует активная заявка на модерацию для этого магазина.");
         } else if (status == ModerationRequestStatus.ACTIVE) {
-            createAndSaveStore(storeDTO, currentUser.get());
+            createAndSaveStore(storeDTO, currentUser);
         } else if (status == ModerationRequestStatus.BLOCKED) {
             logger.warn("Попытка регистрации заблокированного магазина: {}", storeName);
             throw new IllegalArgumentException("Магазин заблокирован, регистрация невозможна.");
         } else {
-            createAndSaveStore(storeDTO, currentUser.get(), ModerationRequestStatus.PENDING.name());
-            createModerationRequest(storeDTO, currentUser.get(), storeName);
+            createAndSaveStore(storeDTO, currentUser, ModerationRequestStatus.PENDING.name());
+            createModerationRequest(storeDTO, currentUser, storeName);
         }
 
         logger.info("Магазин успешно зарегистрирован: {}", storeName);
@@ -81,12 +91,11 @@ public class StoreService {
         moderationRequest.setLocation(storeDTO.getLocation());
         moderationRequest.setDescription(storeDTO.getDescription());
         moderationRequest.setRequestDate(LocalDateTime.now());
-        moderationRequest.setStatus(ModerationRequestStatus.PENDING); // Статус
+        moderationRequest.setStatus(Store.StoreStatus.PENDING); // Статус
         moderationRequestDao.save(moderationRequest);
     }
 
     public List<StoreWithUserDto> storeList() {
-        /// Only ACTIVE
         logger.info("GET Store");
         return storeRepository.findStoreWithUserFullInfo();
     }

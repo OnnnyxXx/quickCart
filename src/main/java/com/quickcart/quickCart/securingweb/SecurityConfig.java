@@ -24,7 +24,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/v1/users/**", "/api/v1/store/all/store").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/v1/users/**", "/api/v1/store/all/store", "api/v1/moderation/**").permitAll()
                         .anyRequest().authenticated()
                 )  // TODO Не забудь про formLogin если будет прод
 //                .formLogin(form -> form.loginPage("/api/v1/users/login"));
