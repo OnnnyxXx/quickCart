@@ -1,5 +1,6 @@
 package com.quickcart.quickCart.moderation;
 
+import com.quickcart.quickCart.store.Store;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -36,16 +37,18 @@ public class ModerationRequest {
     private LocalDateTime requestDate = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
-    private ModerationRequestStatus status; // Статус заявки
+    private Store.StoreStatus status; // Статус заявки
 
-    public ModerationRequest(User user, String storeName, String location, String description) {
+    public ModerationRequest() {}
+
+    public ModerationRequest(Long id, User user, String storeName, String location, String description, LocalDateTime requestDate, Store.StoreStatus status) {
+        this.id = id;
         this.user = user;
         this.storeName = storeName;
         this.location = location;
         this.description = description;
-        this.requestDate = LocalDateTime.now();
-        this.status = ModerationRequestStatus.PENDING;
+        this.requestDate = requestDate;
+        this.status = status;
     }
 
-    public ModerationRequest() {}
 }

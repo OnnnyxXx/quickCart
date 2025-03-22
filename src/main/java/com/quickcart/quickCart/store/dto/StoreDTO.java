@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -37,11 +38,13 @@ public class StoreDTO {
 
     private String logoUrl;
 
+    private MultipartFile logo;
+
     public StoreDTO() {}
 
     public StoreDTO(Long userId, User user, String name,
                     String location, String description, String workingHours,
-                    int rating, Store.StoreStatus status, String logoUrl) {
+                    int rating, Store.StoreStatus status, String logoUrl, MultipartFile logo) {
 
         this.userId = userId;
         this.user = user;
@@ -52,5 +55,6 @@ public class StoreDTO {
         this.rating = rating;
         this.status = status;
         this.logoUrl = logoUrl;
+        this.logo = logo;
     }
 }

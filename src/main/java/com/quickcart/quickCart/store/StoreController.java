@@ -32,9 +32,10 @@ public class StoreController {
         return new ResponseEntity<>("Магазин отправлен на модерацию", HttpStatus.CREATED);
     }
 
-    @Cacheable(value = "cache1")
+//    @Cacheable(value = "cache1")
     @GetMapping("/all/store")
     public List<StoreWithUserDto> storeList() {
+        /// Only ACTIVE
         return storeService.storeList();
     }
 

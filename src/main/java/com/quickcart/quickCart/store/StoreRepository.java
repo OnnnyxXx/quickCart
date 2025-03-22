@@ -3,12 +3,14 @@ package com.quickcart.quickCart.store;
 import com.quickcart.quickCart.store.dto.StoreWithUserDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 
-interface StoreRepository extends JpaRepository<Store, Long> {
+@Repository
+public interface StoreRepository extends JpaRepository<Store, Long> {
 
     @Query("SELECT new com.quickcart.quickCart.store.dto.StoreWithUserDto(" +
             "s.id, s.name, s.location, s.description, s.workingHours, s.rating, " +

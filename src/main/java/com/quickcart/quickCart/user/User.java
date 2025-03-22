@@ -51,7 +51,8 @@ public class User {
     public enum Role {
         ADMIN,
         SELLER,
-        BUYER
+        BUYER,
+        MODER,
     }
 
     @Override
