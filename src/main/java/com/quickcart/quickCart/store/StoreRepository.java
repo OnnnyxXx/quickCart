@@ -13,17 +13,15 @@ import java.util.Optional;
 public interface StoreRepository extends JpaRepository<Store, Long> {
 
     @Query("SELECT new com.quickcart.quickCart.store.dto.StoreWithUserDto(" +
-            "s.id, s.name, s.location, s.description, s.workingHours, s.rating, " +
+            "s.id, s.name, s.location, s.description, s.workingHours, s.rating, s.logoUrl, " +
             "new com.quickcart.quickCart.user.auth.dto.UserDtoInfo(u.id, u.username, u.email, u.location, u.role)) " +
             "FROM Store s JOIN s.user u WHERE s.id = :storeId")
     Optional<StoreWithUserDto> findStoreWithUserById(Long storeId);
 
-
     @Query("SELECT new com.quickcart.quickCart.store.dto.StoreWithUserDto(" +
-            "s.id, s.name, s.location, s.description, s.workingHours, s.rating, " +
+            "s.id, s.name, s.location, s.description, s.workingHours, s.rating, s.logoUrl, " +
             "new com.quickcart.quickCart.user.auth.dto.UserDtoInfo(u.id, u.username, u.email, u.location, u.role)) " +
             "FROM Store s JOIN s.user u WHERE s.status='ACTIVE'")
     List<StoreWithUserDto> findStoreWithUserFullInfo();
-
 
 }

@@ -16,13 +16,13 @@ public interface ModerationRequestDao extends JpaRepository<ModerationRequest, L
     ModerationRequestStatus getStatusByStoreName(@Param("name") String storeName);
 
     @Query("SELECT new com.quickcart.quickCart.moderation.dto.ModerationDTO(" +
-            "s.id, s.name, s.location, s.description, s.workingHours, s.rating, s.status, " +
+            "s.id, s.name, s.logoUrl, s.location, s.description, s.workingHours, s.rating, s.status, " +
             "new com.quickcart.quickCart.user.auth.dto.UserDtoInfo(u.id, u.username, u.email, u.location, u.role)) " +
             "FROM Store s JOIN s.user u")
     List<ModerationDTO> getStores(Pageable pageable);
 
     @Query("SELECT new com.quickcart.quickCart.moderation.dto.ModerationDTO(" +
-            "s.id, s.name, s.location, s.description, s.workingHours, s.rating, s.status, " +
+            "s.id, s.name, s.logoUrl, s.location, s.description, s.workingHours, s.rating, s.status, " +
             "new com.quickcart.quickCart.user.auth.dto.UserDtoInfo(u.id, u.username, u.email, u.location, u.role)) " +
             "FROM Store s JOIN s.user u WHERE u.id = :adminId")
     List<ModerationDTO> getRequestsByAdminId(@Param("adminId") Long adminId);

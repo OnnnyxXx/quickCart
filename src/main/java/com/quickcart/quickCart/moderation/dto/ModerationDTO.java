@@ -13,6 +13,7 @@ import lombok.Setter;
 public class ModerationDTO {
     private Long storeId;
     private String storeName;
+    private String logoUrl;
     private String storeLocation;
     private String storeDescription;
     private String storeWorkingHours;
@@ -23,11 +24,13 @@ public class ModerationDTO {
 
     private UserDtoInfo userDtoInfo;
 
-    public ModerationDTO() {}
+    public ModerationDTO() {
+    }
 
-    public ModerationDTO(Long storeId, String storeName, String storeLocation, String storeDescription, String storeWorkingHours, int storeRating, Store.StoreStatus storeStatus, UserDtoInfo userDtoInfo) {
+    public ModerationDTO(Long storeId, String storeName, String logoUrl, String storeLocation, String storeDescription, String storeWorkingHours, int storeRating, Store.StoreStatus storeStatus, UserDtoInfo userDtoInfo) {
         this.storeId = storeId;
         this.storeName = storeName;
+        this.logoUrl = logoUrl;
         this.storeLocation = storeLocation;
         this.storeDescription = storeDescription;
         this.storeWorkingHours = storeWorkingHours;

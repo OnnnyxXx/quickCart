@@ -1,10 +1,7 @@
 package com.quickcart.quickCart.store.dto;
 
 import com.quickcart.quickCart.user.auth.dto.UserDtoInfo;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
@@ -16,15 +13,17 @@ public class StoreWithUserDto {
     private String storeDescription;
     private String storeWorkingHours;
     private int storeRating;
+    private String logoUrl;
     private UserDtoInfo userDtoInfo;
 
-    public StoreWithUserDto(Long storeId, String storeName, String storeLocation, String storeDescription, String storeWorkingHours, int storeRating, UserDtoInfo userDtoInfo) {
+    public StoreWithUserDto(Long storeId, String storeName, String storeLocation, String storeDescription, String storeWorkingHours, int storeRating, String logoUrl, UserDtoInfo userDtoInfo) {
         this.storeId = storeId;
         this.storeName = storeName;
         this.storeLocation = storeLocation;
         this.storeDescription = storeDescription;
         this.storeWorkingHours = storeWorkingHours;
         this.storeRating = storeRating;
+        this.logoUrl = logoUrl;
         this.userDtoInfo = userDtoInfo;
     }
 
