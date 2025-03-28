@@ -9,13 +9,13 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    @Query(value = "SELECT * FROM users WHERE role='ADMIN'", nativeQuery = true)
-    List<User> getAdmin();
+    @Query(value = "SELECT * FROM users WHERE role='MODER'", nativeQuery = true)
+    List<User> getModer();
 
-    @Query(value = "select * from users where email = :email", nativeQuery = true)
+    @Query(value = "SELECT * FROM users WHERE email = :email", nativeQuery = true)
     Optional<User> findByEmail(String email);
 
-    @Query(value = "select * from users where name= :name", nativeQuery = true)
+    @Query(value = "SELECT * FROM users WHERE name= :name", nativeQuery = true)
     Optional<User> findByName(String name);
 
     @Query("SELECT new com.quickcart.quickCart.user.auth.dto.UserDtoInfo(" +

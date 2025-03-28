@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import com.quickcart.quickCart.user.User;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
@@ -26,6 +27,8 @@ public class ModerationRequest {
     @NotBlank(message = "Store name is required")
     private String storeName;
 
+    private String logoUrl;
+
     @NotBlank(message = "Location is required")
     private String location;
 
@@ -39,16 +42,17 @@ public class ModerationRequest {
     @Enumerated(EnumType.STRING)
     private Store.StoreStatus status; // Статус заявки
 
-    public ModerationRequest() {}
+    public ModerationRequest() {
+    }
 
-    public ModerationRequest(Long id, User user, String storeName, String location, String description, LocalDateTime requestDate, Store.StoreStatus status) {
+    public ModerationRequest(Long id, User user, String storeName, String logoUrl, String location, String description, LocalDateTime requestDate, Store.StoreStatus status) {
         this.id = id;
         this.user = user;
         this.storeName = storeName;
+        this.logoUrl = logoUrl;
         this.location = location;
         this.description = description;
         this.requestDate = requestDate;
         this.status = status;
     }
-
 }

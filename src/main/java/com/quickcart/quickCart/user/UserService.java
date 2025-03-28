@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -17,7 +18,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -39,13 +39,14 @@ public class UserService {
     }
 
     public Optional<UserDtoInfo> getUserByEmail(String email) {
-        return userRepository.findInfoByEmail(email);
+        return Optional.ofNullable(userRepository.findInfoByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")));
     }
 
-    public Optional<UserDtoInfo> getInfoById(Long id){
-        return userRepository.findInfoById(id);
+    public Optional<UserDtoInfo> getInfoById(Long id) {
+        return Optional.ofNullable(userRepository.findInfoById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")));
     }
-
 
     @Transactional
     public void updateUser(UserDTO userDTO) {
@@ -61,7 +62,6 @@ public class UserService {
         }
         userRepository.save(user);
     }
-
 
     public ResponseEntity<User> delete(Long id) {
         userRepository.deleteById(id);

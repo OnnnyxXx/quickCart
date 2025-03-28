@@ -7,6 +7,7 @@ import com.quickcart.quickCart.store.StoreRepository;
 import com.quickcart.quickCart.user.User;
 import com.quickcart.quickCart.user.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,7 @@ public class ModerationRequestService {
 
 
     public Map<User, List<ModerationDTO>> getStores() {
-        List<User> userAdmin = userRepository.getAdmin();
+        List<User> userAdmin = userRepository.getModer();
         Pageable twenty = PageRequest.of(0, 20); // Limit
         List<ModerationDTO> moderationRequestDaoList = moderationRequestDao.getStores(twenty);
 
@@ -68,6 +69,7 @@ public class ModerationRequestService {
     }
 
 
+    @CacheEvict(value = "allStore", allEntries = true)
     @Transactional
     public HashMap<String, String> changeStoreStatus(Long id, ModerationRequestDTO moderationDTO) {
 
