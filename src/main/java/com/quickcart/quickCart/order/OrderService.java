@@ -15,10 +15,10 @@ import java.util.List;
 @Service
 public class OrderService {
 
-    final private OrderRepository orderRepository;
-    final private UserService userService;
-    final private ProductService productService;
-    final private StoreService storeService;
+    OrderRepository orderRepository;
+    UserService userService;
+    ProductService productService;
+    StoreService storeService;
 
     public OrderService( OrderRepository orderRepository, UserService userService, ProductService productService, StoreService storeService){
         super();

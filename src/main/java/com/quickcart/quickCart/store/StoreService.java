@@ -194,4 +194,9 @@ public class StoreService {
         return updatedFields;
     }
 
+
+    public Store getStoreById(Long storeId) {
+        Optional<Store> store = storeRepository.findById(storeId);
+        return store.orElse(null);
+    }
 }
