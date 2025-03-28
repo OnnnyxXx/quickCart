@@ -5,6 +5,7 @@ import com.quickcart.quickCart.user.UserRepository;
 import com.quickcart.quickCart.user.auth.dto.LoginRequest;
 import com.quickcart.quickCart.user.auth.dto.UserDTO;
 import com.quickcart.quickCart.user.auth.dto.UserDetailsServiceImpl;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -14,10 +15,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
@@ -35,9 +37,6 @@ public class AuthService {
         this.authenticationManager = authenticationManager;
     }
 
-    private final SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
-
-
     public void registerUser(UserDTO userDTO) {
         User user = new User();
         user.setUsername(userDTO.getUsername());
@@ -53,7 +52,6 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         userRepository.save(user);
     }
-
 
     public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         try {
@@ -73,15 +71,28 @@ public class AuthService {
         }
     }
 
-
-    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication){
-        logoutHandler.logout(request, response, authentication);
-
-        request.getSession().removeAttribute("SPRING_SECURITY_CONTEXT");
-        request.getSession().invalidate();
+    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+        boolean isSecure = false;
+        String contextPath = null;
+        if (request != null) {
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate();
+            }
+            isSecure = request.isSecure();
+            contextPath = request.getContextPath();
+        }
+        SecurityContext context = SecurityContextHolder.getContext();
         SecurityContextHolder.clearContext();
-        return new ResponseEntity<>("Logged out successfully", HttpStatus.OK);
-
+        context.setAuthentication(null);
+        if (response != null) {
+            Cookie cookie = new Cookie("sessionId", null);
+            String cookiePath = StringUtils.hasText(contextPath) ? contextPath : "/";
+            cookie.setPath(cookiePath);
+            cookie.setMaxAge(0);
+            cookie.setSecure(isSecure);
+            response.addCookie(cookie);
+        }
 
     }
 

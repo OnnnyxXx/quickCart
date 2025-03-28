@@ -1,9 +1,12 @@
 package com.quickcart.quickCart.user;
 
+import com.quickcart.quickCart.securityService.UserSecurityService;
 import com.quickcart.quickCart.user.auth.dto.UserDTO;
 import com.quickcart.quickCart.user.auth.dto.UserDtoInfo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +18,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("api/v1/users")
 public class UserController {
+
+    @Autowired
+    private UserSecurityService userSecurityService;
 
     private final UserService userService;
 
@@ -34,6 +40,7 @@ public class UserController {
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("@userSecurityService.isYou(#id, authentication.name)")
     public ResponseEntity<Map<String, Object>> update(@PathVariable("id") Long id,
                                                       @RequestParam(required = false) String name,
                                                       @RequestParam(required = false) String email,
@@ -43,7 +50,7 @@ public class UserController {
         Map<String, Object> response = new HashMap<>();
 
         if (userDTO == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "User not found"));
         }
 
         if (name != null) {
@@ -62,17 +69,16 @@ public class UserController {
 
         if (password != null) {
             userDTO.setPassword(password);
-//            response.put("password", userDTO.getPassword()); не надо его возвращать
         }
 
         userService.updateUser(userDTO);
         return ResponseEntity.ok(response);
     }
 
-
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<User> delete(@PathVariable("id") Long id) {
-        return userService.delete(id);
-    }
+//
+//    @DeleteMapping("/delete/{id}")
+//    public ResponseEntity<User> delete(@PathVariable("id") Long id) {
+//        return userService.delete(id);
+//    }
 
 }

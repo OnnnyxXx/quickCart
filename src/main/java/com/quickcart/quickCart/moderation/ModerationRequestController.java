@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@PreAuthorize("hasAuthority('ADMIN')") // TODO for Moder
+@PreAuthorize("hasAuthority('MODER')")
 @RequestMapping("api/v1/moderation")
 public class ModerationRequestController {
     private final ModerationRequestService moderationRequestService;
@@ -25,7 +25,6 @@ public class ModerationRequestController {
 
     @GetMapping("/admin/store")
     public ResponseEntity<Map<User, List<ModerationDTO>>> storeAll() {
-        // TODO for ADMIN
         Map<User, List<ModerationDTO>> stores = moderationRequestService.getStores();
         return ResponseEntity.ok(stores);
     }
