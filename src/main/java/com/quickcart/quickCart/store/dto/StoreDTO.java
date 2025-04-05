@@ -1,5 +1,6 @@
 package com.quickcart.quickCart.store.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.quickcart.quickCart.store.Store;
 import com.quickcart.quickCart.user.User;
 import jakarta.validation.constraints.NotBlank;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class StoreDTO {
 
     private Long userId;
@@ -45,7 +47,6 @@ public class StoreDTO {
     public StoreDTO(Long userId, User user, String name,
                     String location, String description, String workingHours,
                     int rating, Store.StoreStatus status, String logoUrl, MultipartFile logo) {
-
         this.userId = userId;
         this.user = user;
         this.name = name;
@@ -57,4 +58,18 @@ public class StoreDTO {
         this.logoUrl = logoUrl;
         this.logo = logo;
     }
+
+    public StoreDTO(Long userId, String name, String location, String description,
+                    String workingHours, int rating, Store.StoreStatus status, String logoUrl) {
+        this.userId = userId;
+        this.name = name;
+        this.location = location;
+        this.description = description;
+        this.workingHours = workingHours;
+        this.rating = rating;
+        this.status = status;
+        this.logoUrl = logoUrl;
+    }
+
+
 }

@@ -1,5 +1,6 @@
 package com.quickcart.quickCart.store;
 
+import com.quickcart.quickCart.store.dto.StoreDTO;
 import com.quickcart.quickCart.store.dto.StoreWithUserDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -23,5 +24,12 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
             "new com.quickcart.quickCart.user.auth.dto.UserDtoInfo(u.id, u.username, u.email, u.location, u.role)) " +
             "FROM Store s JOIN s.user u WHERE s.status='ACTIVE'")
     List<StoreWithUserDto> findStoreWithUserFullInfo();
+
+
+    @Query("SELECT new com.quickcart.quickCart.store.dto.StoreDTO(" +
+            "u.id, s.name, s.location, s.description, s.workingHours, s.rating, s.status, s.logoUrl) " +
+            "FROM Store s JOIN s.user u WHERE u.email = :userName")
+    List<StoreDTO> myStore(String userName);
+
 
 }

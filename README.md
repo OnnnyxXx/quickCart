@@ -78,6 +78,8 @@ QuickCart provides essential features for online store management, focusing on u
 
 After setup, access QuickCart at `http://localhost:8080`.
 
+Swagger http://127.0.0.1:8080/swagger-ui/index.html.
+
 ---
 
 ## Contributing

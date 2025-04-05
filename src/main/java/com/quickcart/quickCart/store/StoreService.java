@@ -142,6 +142,13 @@ public class StoreService {
         }
     }
 
+    public List<StoreDTO> myStore() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = authentication.getName();
+        return storeRepository.myStore(currentUserEmail);
+    }
+
+
     @Cacheable(value = "allStore")
     public List<StoreWithUserDto> storeList() {
         return storeRepository.findStoreWithUserFullInfo();

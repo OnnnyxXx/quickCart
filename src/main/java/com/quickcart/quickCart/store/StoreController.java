@@ -37,6 +37,12 @@ public class StoreController {
         return new ResponseEntity<>("Магазин отправлен на модерацию", HttpStatus.CREATED);
     }
 
+    @GetMapping("/my/store")
+    public List<StoreDTO> myStore() {
+        return storeService.myStore();
+    }
+
+
     @GetMapping("/all/store")
     public List<StoreWithUserDto> storeList() {
         /// Only ACTIVE
