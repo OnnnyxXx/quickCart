@@ -2,14 +2,19 @@ package com.quickcart.quickCart.product;
 
 import com.quickcart.quickCart.order.Order;
 import com.quickcart.quickCart.order.OrderService;
+import com.quickcart.quickCart.product.dto.ProductDTO;
+import com.quickcart.quickCart.store.dto.StoreDtoUpdate;
 import com.quickcart.quickCart.user.User;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -19,38 +24,33 @@ public class ProductController {
     @Autowired
     ProductService productService;
 
-    @PostMapping("/stores/{storeId}/products")
-    public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product, @PathVariable("storeId") Long storeId,/* CurrentUser*/ User user){
-        return productService.createProduct(product, storeId);
+    @PostMapping("/store/{storeId}/product")
+    public ResponseEntity<?> createProduct(@ModelAttribute @Valid ProductDTO product, @PathVariable("storeId") Long storeId){
+        productService.createProduct(product, storeId);
+        return new ResponseEntity<>("Продукт успешно создан", HttpStatus.CREATED);
     }
 
-    @GetMapping("/stores/{storeId}/products")
-    public ResponseEntity<List<Product>> getProductsByStore(@PathVariable("storeId") Long storeId){
+    @GetMapping("/store/{storeId}/products")
+    public ResponseEntity<List<ProductDTO>> getProductsByStore(@PathVariable("storeId") Long storeId){
         return productService.getProductsByStoreId(storeId);
     }
 
-    @GetMapping("/products/{id}")
-    public ResponseEntity<Product> getProduct(@PathVariable("id") Long id){
+    @GetMapping("/product/productImage/{imageName:.+}")
+    public ResponseEntity<Resource> getLogo(@PathVariable String imageName,
+                                            @RequestParam(required = false, defaultValue = "false")
+                                            boolean download) {
+        return productService.getImage(imageName, download);
+    }
+
+    @GetMapping("/product/{id}")
+    public ResponseEntity<ProductDTO> getProduct(@PathVariable("id") Long id){
         return productService.getProductById(id);
     }
 
-    @PutMapping("/products/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable("id") Long id,
-                                                 @RequestParam(required = false) String name,
-                                                 @RequestParam(required = false) String description,
-                                                 @RequestParam(required = false) BigDecimal price,
-                                                 @RequestParam(required = false) Integer stock,
-                                                 @RequestParam(required = false) String imageUrl,
-                                                 @RequestParam(required = false) String category){
-
-        Product product = productService.getProductById(id).getBody();
-        if(product == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        if(name != null) product.setName(name);
-        if(description != null) product.setDescription(description);
-        if(price != null) product.setPrice(price);
-        if(stock != null) product.setStock(stock);
-        if(imageUrl != null) product.setImageUrl(imageUrl);
-        if(category != null) product.setCategory(category);
-        return productService.updateProductById(id, product);
+    @PatchMapping("/product/{id}")
+    public ResponseEntity<HashMap<String, String>> updateProduct(@PathVariable("id") Long id,
+                                                                 @ModelAttribute @Valid ProductDTO productDTO,
+                                                                 @RequestParam(required = false) MultipartFile image){
+        return ResponseEntity.ok(productService.updateProductById(id, productDTO, image));
     }
 }

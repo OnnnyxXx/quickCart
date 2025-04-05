@@ -19,7 +19,7 @@ public class OrderController {
     public ResponseEntity<Order> createOrder(@Valid @RequestBody Order order,/* @CurrentUser*/ User user){
         return orderService.createOrder(order, user);
     }
-    @GetMapping("/{userId}")
+    @GetMapping("/user/{userId}")
     public List<Order> getListOrders(@PathVariable("userId") Long userId){
         return orderService.getOrdersByUserId(userId);
     }
