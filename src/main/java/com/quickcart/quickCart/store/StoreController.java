@@ -6,6 +6,8 @@ import com.quickcart.quickCart.store.dto.StoreDtoUpdate;
 import com.quickcart.quickCart.store.dto.StoreWithUserDto;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,9 +27,11 @@ public class StoreController {
     @Autowired
     private StoreRepository storeRepository;
 
+    private final ResourceLoader resourceLoader;
     private final StoreService storeService;
 
-    public StoreController(StoreService storeService) {
+    public StoreController(ResourceLoader resourceLoader, StoreService storeService) {
+        this.resourceLoader = resourceLoader;
         this.storeService = storeService;
     }
 
@@ -42,6 +46,12 @@ public class StoreController {
         return storeService.myStore();
     }
 
+    @GetMapping("/storeLogo/{imageName:.+}")
+    public ResponseEntity<Resource> getLogo(@PathVariable String imageName,
+                                             @RequestParam(required = false, defaultValue = "false")
+                                             boolean download) {
+        return storeService.getLogo(imageName, download);
+    }
 
     @GetMapping("/all/store")
     public List<StoreWithUserDto> storeList() {
@@ -57,7 +67,9 @@ public class StoreController {
     @PatchMapping("/update/{id}")
     @PreAuthorize("@storeSecurityService.isOwner(#id, authentication.name)")
     public ResponseEntity<HashMap<String, String>> updateStore(
-            @PathVariable("id") Long id, @ModelAttribute @Valid StoreDtoUpdate withUserDto, MultipartFile logo) {
+            @PathVariable("id") Long id,
+            @ModelAttribute @Valid StoreDtoUpdate withUserDto,
+            @RequestParam(required = false) MultipartFile logo) {
 
         HashMap<String, String> result = storeService.updateStore(id, withUserDto, logo);
         return ResponseEntity.ok(result);

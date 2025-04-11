@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@PreAuthorize("hasAuthority('MODER')")
+@PreAuthorize("hasAuthority('MODER') or hasAuthority('ADMIN')")
 @RequestMapping("api/v1/moderation")
 public class ModerationRequestController {
     private final ModerationRequestService moderationRequestService;

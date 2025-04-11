@@ -27,7 +27,7 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
 
     @Query("SELECT new com.quickcart.quickCart.store.dto.StoreDTO(" +
-            "u.id, s.name, s.location, s.description, s.workingHours, s.rating, s.status, s.logoUrl) " +
+            "u.id, s.id, s.name, s.location, s.description, s.workingHours, s.rating, s.status, s.logoUrl) " +
             "FROM Store s JOIN s.user u WHERE u.email = :userName")
     List<StoreDTO> myStore(String userName);
 

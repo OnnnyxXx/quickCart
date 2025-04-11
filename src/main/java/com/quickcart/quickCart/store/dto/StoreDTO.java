@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class StoreDTO {
 
     private Long userId;
+    private Long id;
     private User user;
 
     @NotBlank(message = "Name is required")
@@ -71,5 +72,16 @@ public class StoreDTO {
         this.logoUrl = logoUrl;
     }
 
+    public StoreDTO(Long userId, Long id, String name, String location, String description, String workingHours, int rating, Store.StoreStatus status, String logoUrl) {
+        this.userId = userId;
+        this.id = id;
+        this.name = name;
+        this.location = location;
+        this.description = description;
+        this.workingHours = workingHours;
+        this.rating = rating;
+        this.status = status;
+        this.logoUrl = logoUrl;
+    }
 
 }

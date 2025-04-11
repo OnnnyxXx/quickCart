@@ -28,6 +28,10 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("/profile/user")
+    public Optional<UserDtoInfo> profileUser(){
+        return userService.profileUser();
+    }
 
     @GetMapping("/{id}")
     public Optional<UserDtoInfo> getUserById(@PathVariable("id") Long id) {
