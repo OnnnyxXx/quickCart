@@ -14,7 +14,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -25,6 +30,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +54,7 @@ public class StoreService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public void registerStore(StoreDTO storeDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserEmail = authentication.getName();
@@ -114,31 +122,61 @@ public class StoreService {
         moderationRequestDao.save(moderationRequest);
     }
 
-
     public String saveLogoAsWebP(MultipartFile logo) {
         try {
+            String formatName = "webp"; // webp, png, jpg без .
             String contentType = logo.getContentType();
-            if (!contentType.startsWith("image/")) {
+            if (contentType == null || !contentType.startsWith("image/")) {
                 throw new IllegalArgumentException("Файл должен быть изображением.");
             }
 
             BufferedImage bufferedImage = ImageIO.read(logo.getInputStream());
             if (bufferedImage == null) {
-                throw new IllegalArgumentException("Невозможно прочитать изображения");
+                throw new IllegalArgumentException("Невозможно прочитать изображение");
             }
 
             String originalFileName = logo.getOriginalFilename();
             String sanitizedFileName = originalFileName.replaceAll("[^a-zA-Z0-9.]", "_");
-            String fileName = sanitizedFileName + "_" + UUID.randomUUID() + ".webp";
-            File outputFile = new File("src/main/resources/static/storeLogo/" + fileName);
+            String fileName = sanitizedFileName + "_" + UUID.randomUUID() + "." + formatName;
 
-            ImageIO.write(bufferedImage, "webp", outputFile);
+            File outputDir = new File("src/main/resources/static/storeLogo/");
+            if (!outputDir.exists()) {
+                outputDir.mkdirs();
+            }
 
-            return "/storeLogo/" + fileName;
+            File outputFile = new File(outputDir, fileName);
+            ImageIO.write(bufferedImage, formatName, outputFile);
+
+            return fileName;
 
         } catch (IOException e) {
             logger.error("Ошибка при сохранении логотипа в формате WebP", e);
-            throw new RuntimeException("Ошибка при сохранении логотипа в формате WebP");
+            throw new RuntimeException("Ошибка при сохранении логотипа в формате WebP", e);
+        } catch (IllegalArgumentException e) {
+            logger.error("Ошибка при обработке изображения: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    public ResponseEntity<Resource> getLogo(String imageName, boolean download) {
+        try {
+            Path filePath = Paths.get("src/main/resources/static/storeLogo/" + imageName);
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            String contentDisposition = download
+                    ? "attachment; filename=\"" + resource.getFile() + "\""
+                    : "inline; filename=\"" + resource.getFilename() + "\"";
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -147,7 +185,6 @@ public class StoreService {
         String currentUserEmail = authentication.getName();
         return storeRepository.myStore(currentUserEmail);
     }
-
 
     @Cacheable(value = "allStore")
     public List<StoreWithUserDto> storeList() {
@@ -175,6 +212,10 @@ public class StoreService {
         if (withUserDto.getStoreDescription() != null) {
             store.setDescription(withUserDto.getStoreDescription());
             updatedFields.put("description", withUserDto.getStoreDescription());
+        }
+        if (withUserDto.getStoreWorkingHours() != null) {
+            store.setWorkingHours(withUserDto.getStoreWorkingHours());
+            updatedFields.put("workingHours", withUserDto.getStoreWorkingHours());
         }
 
         if (withUserDto.getStoreLocation() != null) {

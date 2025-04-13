@@ -28,9 +28,10 @@ public class SecurityConfig {
                                 "/api/v1/auth/**",
                                 "/api/v1/users/**",
                                 "/api/v1/store/all/store",
+                                "/api/v1/store/storeLogo/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui/index.html" )
+                                "/swagger-ui/index.html")
                         .permitAll()
                         .anyRequest().authenticated()
                 )  // TODO Не забудь про formLogin если будет прод
@@ -44,7 +45,7 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(request -> {
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowedOrigins(List.of("http://localhost:3000", "http://127.0.0.1:3000"));
-            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
             config.setAllowedHeaders(List.of("*"));
             config.setAllowCredentials(true);
             return config;

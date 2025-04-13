@@ -34,22 +34,31 @@ public class ModerationRequestService {
 
 
     public Map<User, List<ModerationDTO>> getStores() {
-        List<User> userAdmin = userRepository.getModer();
-        Pageable twenty = PageRequest.of(0, 20); // Limit
-        List<ModerationDTO> moderationRequestDaoList = moderationRequestDao.getStores(twenty);
+        try {
+            List<User> userAdmin = userRepository.getModer();
+            Pageable twenty = PageRequest.of(0, 20); // Limit
+            List<ModerationDTO> moderationRequestDaoList = moderationRequestDao.getStores(twenty);
 
-        Map<User, List<ModerationDTO>> adminRequestsMap = new HashMap<>();
+            Map<User, List<ModerationDTO>> adminRequestsMap = new HashMap<>();
 
-        for (User admin : userAdmin) {
-            adminRequestsMap.put(admin, new ArrayList<>());
+            if(userAdmin.isEmpty()){
+                return adminRequestsMap;
+            }
+
+            for (User admin : userAdmin) {
+                adminRequestsMap.put(admin, new ArrayList<>());
+            }
+
+            for (int i = 0; i < moderationRequestDaoList.size(); i++) {
+                User assignedAdmin = userAdmin.get(i % userAdmin.size());
+                adminRequestsMap.get(assignedAdmin).add(moderationRequestDaoList.get(i));
+            }
+
+            return adminRequestsMap;
+        }catch (Exception e){
+            return Collections.emptyMap();
         }
 
-        for (int i = 0; i < moderationRequestDaoList.size(); i++) {
-            User assignedAdmin = userAdmin.get(i % userAdmin.size());
-            adminRequestsMap.get(assignedAdmin).add(moderationRequestDaoList.get(i));
-        }
-
-        return adminRequestsMap;
     }
 
     public List<ModerationDTO> getStoresForModer() {

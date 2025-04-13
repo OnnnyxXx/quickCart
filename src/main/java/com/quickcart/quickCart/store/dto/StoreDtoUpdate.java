@@ -11,18 +11,19 @@ public class StoreDtoUpdate {
     private String storeName;
     private String storeLocation;
     private String storeDescription;
-
+    private String storeWorkingHours;
     private MultipartFile logo;
     private String storeUrlLogo;
 
     public StoreDtoUpdate() {
     }
 
-    public StoreDtoUpdate(Long userId, String storeName, String storeLocation, String storeDescription, MultipartFile logo, String storeUrlLogo) {
+    public StoreDtoUpdate(Long userId, String storeName, String storeLocation, String storeDescription, String storeWorkingHours, MultipartFile logo, String storeUrlLogo) {
         this.userId = userId;
         this.storeName = storeName;
         this.storeLocation = storeLocation;
         this.storeDescription = storeDescription;
+        this.storeWorkingHours = storeWorkingHours;
         this.logo = logo;
         this.storeUrlLogo = storeUrlLogo;
     }
