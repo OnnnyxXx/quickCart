@@ -32,7 +32,9 @@ public class ProductController {
 
     @GetMapping("/store/{storeId}/products")
     public ResponseEntity<List<ProductDTO>> getProductsByStore(@PathVariable("storeId") Long storeId){
-        return productService.getProductsByStoreId(storeId);
+        List<ProductDTO> listDTO = productService.getProductsByStoreId(storeId);
+        if(listDTO == null) ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.ok(listDTO);
     }
 
     @GetMapping("/product/productImage/{imageName:.+}")
@@ -44,7 +46,9 @@ public class ProductController {
 
     @GetMapping("/product/{id}")
     public ResponseEntity<ProductDTO> getProduct(@PathVariable("id") Long id){
-        return productService.getProductById(id);
+        ProductDTO productDTO = productService.getProductById(id);
+        if(productDTO == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.ok(productDTO);
     }
 
     @PatchMapping("/product/{id}")

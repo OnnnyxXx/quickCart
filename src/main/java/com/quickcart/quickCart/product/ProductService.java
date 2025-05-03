@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +33,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 @Service
+@EnableCaching
 public class ProductService {
 
     private static final Logger logger = LoggerFactory.getLogger(StoreService.class);
@@ -73,6 +75,7 @@ public class ProductService {
     }
     private ProductDTO getProductDTO(Product product){
         ProductDTO productDTO = new ProductDTO();
+        productDTO.setId(product.getId());
         productDTO.setName(product.getName());
         productDTO.setDescription(product.getDescription());
         productDTO.setCategory(product.getCategory());
@@ -82,24 +85,24 @@ public class ProductService {
         return productDTO;
     }
 
-    @Cacheable(value = "products", key = "#id")
-    public ResponseEntity<List<ProductDTO>> getProductsByStoreId(Long storeId) {
+    @Cacheable(value = "products", key = "#storeId")
+    public List<ProductDTO> getProductsByStoreId(Long storeId) {
         Store store = storeService.getStoreById(storeId);
-        if(store == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        if(store == null) return null;
         List<Product> productList = store.getProducts();
         List<ProductDTO> productDTOList = new ArrayList<>();
         for(Product product: productList){
             productDTOList.add(getProductDTO(product));
         }
-        return ResponseEntity.ok(productDTOList);
+        return productDTOList;
     }
 
     @Cacheable(value = "product", key = "#id")
-    public ResponseEntity<ProductDTO> getProductById(Long id) {
+    public ProductDTO getProductById(Long id) {
         Optional<Product> product = productRepository.findById(id);
-        if(product == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        if(product == null) return null;
         ProductDTO productDTO = getProductDTO(product.get());
-        return ResponseEntity.ok(productDTO);
+        return productDTO;
     }
     @CacheEvict(value = "product", key = "#id")
     @Transactional
