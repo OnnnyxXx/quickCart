@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class StoreDTO {
+public class StoreDto {
 
     private Long userId;
     private Long id;
@@ -43,9 +43,9 @@ public class StoreDTO {
 
     private MultipartFile logo;
 
-    public StoreDTO() {}
+    public StoreDto() {}
 
-    public StoreDTO(Long userId, User user, String name,
+    public StoreDto(Long userId, User user, String name,
                     String location, String description, String workingHours,
                     int rating, Store.StoreStatus status, String logoUrl, MultipartFile logo) {
         this.userId = userId;
@@ -60,7 +60,7 @@ public class StoreDTO {
         this.logo = logo;
     }
 
-    public StoreDTO(Long userId, String name, String location, String description,
+    public StoreDto(Long userId, String name, String location, String description,
                     String workingHours, int rating, Store.StoreStatus status, String logoUrl) {
         this.userId = userId;
         this.name = name;
@@ -72,7 +72,7 @@ public class StoreDTO {
         this.logoUrl = logoUrl;
     }
 
-    public StoreDTO(Long userId, Long id, String name, String location, String description, String workingHours, int rating, Store.StoreStatus status, String logoUrl) {
+    public StoreDto(Long userId, Long id, String name, String location, String description, String workingHours, int rating, Store.StoreStatus status, String logoUrl) {
         this.userId = userId;
         this.id = id;
         this.name = name;

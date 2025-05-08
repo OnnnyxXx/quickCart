@@ -1,8 +1,9 @@
 package com.quickcart.quickCart.user;
 
 import com.quickcart.quickCart.securityService.UserSecurityService;
-import com.quickcart.quickCart.user.auth.dto.UserDTO;
-import com.quickcart.quickCart.user.auth.dto.UserDtoInfo;
+import com.quickcart.quickCart.auth.dto.UserDto;
+import com.quickcart.quickCart.auth.dto.UserDtoInfo;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-
+@Tag(name = "User", description = "The User API")
 @RestController
 @RequestMapping("api/v1/users")
 public class UserController {
@@ -50,11 +51,11 @@ public class UserController {
                                                       @RequestParam(required = false) String email,
                                                       @RequestParam(required = false) String password,
                                                       @RequestParam(required = false) String location) {
-        UserDTO userDTO = userService.getUserById(id).getBody();
+        UserDto userDTO = userService.getUserById(id).getBody();
         Map<String, Object> response = new HashMap<>();
 
         if (userDTO == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "User not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Пользователь не найден"));
         }
 
         if (name != null) {

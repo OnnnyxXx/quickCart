@@ -1,4 +1,4 @@
-package com.quickcart.quickCart.user.auth.dto;
+package com.quickcart.quickCart.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -3,7 +3,7 @@ package com.quickcart.quickCart.store;
 import com.quickcart.quickCart.moderation.ModerationRequest;
 import com.quickcart.quickCart.moderation.ModerationRequestDao;
 import com.quickcart.quickCart.moderation.ModerationRequestStatus;
-import com.quickcart.quickCart.store.dto.StoreDTO;
+import com.quickcart.quickCart.store.dto.StoreDto;
 import com.quickcart.quickCart.store.dto.StoreDtoUpdate;
 import com.quickcart.quickCart.store.dto.StoreWithUserDto;
 import com.quickcart.quickCart.user.User;
@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -39,7 +39,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@EnableCaching
 public class StoreService {
 
     private static final Logger logger = LoggerFactory.getLogger(StoreService.class);
@@ -55,7 +54,7 @@ public class StoreService {
     }
 
     @Transactional
-    public void registerStore(StoreDTO storeDTO) {
+    public void registerStore(StoreDto storeDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserEmail = authentication.getName();
 
@@ -87,7 +86,7 @@ public class StoreService {
     }
 
 
-    private Store createAndSaveStore(StoreDTO storeDTO, User currentUser, String status, MultipartFile logo) {
+    private Store createAndSaveStore(StoreDto storeDTO, User currentUser, String status, MultipartFile logo) {
         Store store = new Store();
         store.setName(storeDTO.getName());
         store.setDescription(storeDTO.getDescription());
@@ -106,11 +105,11 @@ public class StoreService {
     }
 
 
-    private Store createAndSaveStore(StoreDTO storeDTO, User currentUser, MultipartFile logo) {
+    private Store createAndSaveStore(StoreDto storeDTO, User currentUser, MultipartFile logo) {
         return createAndSaveStore(storeDTO, currentUser, Store.StoreStatus.PENDING.name(), logo);
     }
 
-    private void createModerationRequest(StoreDTO storeDTO, User currentUser, String storeName, String logo) {
+    private void createModerationRequest(StoreDto storeDTO, User currentUser, String storeName, String logo) {
         ModerationRequest moderationRequest = new ModerationRequest();
         moderationRequest.setUser(currentUser);
         moderationRequest.setStoreName(storeName);
@@ -136,7 +135,10 @@ public class StoreService {
             }
 
             String originalFileName = logo.getOriginalFilename();
-            String sanitizedFileName = originalFileName.replaceAll("[^a-zA-Z0-9.]", "_");
+            String sanitizedFileName = null;
+            if (originalFileName != null) {
+                sanitizedFileName = originalFileName.replaceAll("[^a-zA-Z0-9.]", "_");
+            }
             String fileName = sanitizedFileName + "_" + UUID.randomUUID() + "." + formatName;
 
             File outputDir = new File("src/main/resources/static/storeLogo/");
@@ -180,13 +182,13 @@ public class StoreService {
         }
     }
 
-    public List<StoreDTO> myStore() {
+    public List<StoreDto> myStore() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserEmail = authentication.getName();
         return storeRepository.myStore(currentUserEmail);
     }
 
-    @Cacheable(value = "allStore")
+    @Cacheable(value = "storeAll")
     public List<StoreWithUserDto> storeList() {
         return storeRepository.findStoreWithUserFullInfo();
     }
@@ -194,14 +196,17 @@ public class StoreService {
     @Cacheable(value = "store", key = "#id")
     public StoreWithUserDto storeDTO(Long id) {
         return storeRepository.findStoreWithUserById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Store not found with id " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Магазин не найден " + id));
     }
 
-    @CacheEvict(value = "store", key = "#id")
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = "storeAll", allEntries = true),
+        @CacheEvict(value = "store", key = "#id")
+    })
     public HashMap<String, String> updateStore(Long id, StoreDtoUpdate withUserDto, MultipartFile logo) {
         Store store = storeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Store not found with id " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Магазин не найден " + id));
 
         HashMap<String, String> updatedFields = new HashMap<>();
         if (withUserDto.getStoreName() != null) {
@@ -229,7 +234,6 @@ public class StoreService {
                 store.setLogoUrl(storeLogoUrl);
                 updatedFields.put("logo", storeLogoUrl);
             } catch (Exception e) {
-                e.printStackTrace();
                 logger.error("Error saving logo: {}", e.getMessage());
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Ошибка обновления логотипа");
             }

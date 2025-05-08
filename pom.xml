@@ -109,6 +109,13 @@
 			<version>2.8.5</version>
 		</dependency>
 
+		<!-- Для тестов -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>

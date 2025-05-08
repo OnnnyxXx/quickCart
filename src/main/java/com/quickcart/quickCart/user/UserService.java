@@ -1,7 +1,7 @@
 package com.quickcart.quickCart.user;
 
-import com.quickcart.quickCart.user.auth.dto.UserDTO;
-import com.quickcart.quickCart.user.auth.dto.UserDtoInfo;
+import com.quickcart.quickCart.auth.dto.UserDto;
+import com.quickcart.quickCart.auth.dto.UserDtoInfo;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
@@ -33,10 +33,10 @@ public class UserService {
     }
 
     // Для /update/{id}
-    public ResponseEntity<UserDTO> getUserById(Long id) {
+    public ResponseEntity<UserDto> getUserById(Long id) {
         return userRepository.findById(id)
                 .map(user -> {
-                    UserDTO userDTO = new UserDTO();
+                    UserDto userDTO = new UserDto();
                     userDTO.setId(user.getId());
                     userDTO.setUsername(user.getUsername());
                     userDTO.setEmail(user.getEmail());
@@ -48,18 +48,18 @@ public class UserService {
 
     public Optional<UserDtoInfo> getUserByEmail(String email) {
         return Optional.ofNullable(userRepository.findInfoByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден")));
     }
 
     public Optional<UserDtoInfo> getInfoById(Long id) {
         return Optional.ofNullable(userRepository.findInfoById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден")));
     }
 
     @Transactional
-    public void updateUser(UserDTO userDTO) {
+    public void updateUser(UserDto userDTO) {
         User user = userRepository.findById(userDTO.getId())
-                .orElseThrow(() -> new EntityNotFoundException("User  not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());

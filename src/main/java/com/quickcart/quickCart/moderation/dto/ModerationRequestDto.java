@@ -8,14 +8,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ModerationRequestDTO {
+public class ModerationRequestDto {
 
     @Enumerated(EnumType.STRING)
     private Store.StoreStatus status;
 
-    public ModerationRequestDTO() {}
+    public ModerationRequestDto() {}
 
-    public ModerationRequestDTO(Store.StoreStatus status) {
+    public ModerationRequestDto(Store.StoreStatus status) {
         this.status = status;
     }
 }
