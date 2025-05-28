@@ -42,7 +42,7 @@ public class ModerationRequestService {
 
             Map<User, List<ModerationDto>> adminRequestsMap = new HashMap<>();
 
-            if(userAdmin.isEmpty()){
+            if (userAdmin.isEmpty()){
                 return adminRequestsMap;
             }
 
@@ -73,9 +73,8 @@ public class ModerationRequestService {
 
         User currentAdmin = currentModerOpt.get();
         Map<User, List<ModerationDto>> moderRequestsMap = getStores();
-        List<ModerationDto> currentModerRequests = moderRequestsMap.getOrDefault(currentAdmin, Collections.emptyList());
 
-        return currentModerRequests;
+        return moderRequestsMap.getOrDefault(currentAdmin, Collections.emptyList());
     }
 
     @Transactional

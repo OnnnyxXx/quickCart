@@ -1,8 +1,9 @@
 package com.quickcart.quickCart.user;
 
-import com.quickcart.quickCart.auth.dto.UserDto;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.quickcart.quickCart.auth.dto.UserDtoInfo;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.Optional;
 
 
@@ -19,31 +21,23 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+
+    private final ObjectMapper objectMapper;
+
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository,
+                       ObjectMapper objectMapper,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.objectMapper = objectMapper;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Optional<UserDtoInfo> profileUser(){
+    public Optional<UserDtoInfo> profileUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserEmail = authentication.getName();
         return userRepository.findInfoByEmail(currentUserEmail);
-    }
-
-    // Для /update/{id}
-    public ResponseEntity<UserDto> getUserById(Long id) {
-        return userRepository.findById(id)
-                .map(user -> {
-                    UserDto userDTO = new UserDto();
-                    userDTO.setId(user.getId());
-                    userDTO.setUsername(user.getUsername());
-                    userDTO.setEmail(user.getEmail());
-                    userDTO.setLocation(user.getLocation());
-                    return ResponseEntity.ok(userDTO);
-                })
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     public Optional<UserDtoInfo> getUserByEmail(String email) {
@@ -57,18 +51,13 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(UserDto userDTO) {
-        User user = userRepository.findById(userDTO.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
+    public User patch(Long id, JsonNode patchNode) throws IOException {
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь c id `%s` не найден".formatted(id)));
 
-        user.setUsername(userDTO.getUsername());
-        user.setEmail(userDTO.getEmail());
-        user.setLocation(userDTO.getLocation());
+        objectMapper.readerForUpdating(user).readValue(patchNode);
 
-        if (userDTO.getPassword() != null) {
-            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        }
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     public ResponseEntity<User> delete(Long id) {

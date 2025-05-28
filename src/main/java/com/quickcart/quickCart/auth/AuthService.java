@@ -53,7 +53,8 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request,
+                                        HttpServletResponse response) {
         try {
             Authentication authenticationRequest =
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
@@ -65,9 +66,15 @@ public class AuthService {
             HttpSession session = request.getSession();
             session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
+            // Установка cookie
+            Cookie cookie = new Cookie("sessionId", session.getId());
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            response.addCookie(cookie);
+
             return new ResponseEntity<>("Пользователь успешно вошел в систему!.", HttpStatus.OK);
         } catch (AuthenticationException e) {
-            return new ResponseEntity<>("Неверный адрес электронной почты или пароль.", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("Неверный адрес электронной почты или пароль.", HttpStatus.BAD_REQUEST);
         }
     }
 
