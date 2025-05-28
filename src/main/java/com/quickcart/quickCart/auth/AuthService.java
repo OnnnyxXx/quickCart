@@ -4,7 +4,6 @@ import com.quickcart.quickCart.user.User;
 import com.quickcart.quickCart.user.UserRepository;
 import com.quickcart.quickCart.auth.dto.LoginRequest;
 import com.quickcart.quickCart.auth.dto.UserDto;
-import com.quickcart.quickCart.auth.dto.UserDetailsServiceImpl;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,7 +30,8 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, UserDetailsServiceImpl userDetailsService) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                       AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
@@ -78,7 +78,7 @@ public class AuthService {
         }
     }
 
-    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
         boolean isSecure = false;
         String contextPath = null;
         if (request != null) {

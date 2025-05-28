@@ -2,7 +2,6 @@ package com.quickcart.quickCart.user;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.quickcart.quickCart.auth.dto.UserDtoInfo;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
@@ -21,17 +20,11 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-
     private final ObjectMapper objectMapper;
 
-    private final PasswordEncoder passwordEncoder;
-
-    public UserService(UserRepository userRepository,
-                       ObjectMapper objectMapper,
-                       PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.objectMapper = objectMapper;
-        this.passwordEncoder = passwordEncoder;
     }
 
     public Optional<UserDtoInfo> profileUser() {
