@@ -1,18 +1,16 @@
 package com.quickcart.quickCart.user;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.quickcart.quickCart.securityService.UserSecurityService;
-import com.quickcart.quickCart.auth.dto.UserDto;
 import com.quickcart.quickCart.auth.dto.UserDtoInfo;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
 import java.util.Optional;
 
 @Tag(name = "User", description = "The User API")
@@ -44,40 +42,10 @@ public class UserController {
         return userService.getUserByEmail(email);
     }
 
-    @PutMapping("/update/{id}")
+    @PatchMapping("/update/{id}")
     @PreAuthorize("@userSecurityService.isYou(#id, authentication.name)")
-    public ResponseEntity<Map<String, Object>> update(@PathVariable("id") Long id,
-                                                      @RequestParam(required = false) String name,
-                                                      @RequestParam(required = false) String email,
-                                                      @RequestParam(required = false) String password,
-                                                      @RequestParam(required = false) String location) {
-        UserDto userDTO = userService.getUserById(id).getBody();
-        Map<String, Object> response = new HashMap<>();
-
-        if (userDTO == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Пользователь не найден"));
-        }
-
-        if (name != null) {
-            userDTO.setUsername(name);
-            response.put("name", userDTO.getUsername());
-        }
-        if (email != null) {
-            userDTO.setEmail(email);
-            response.put("email", userDTO.getEmail());
-        }
-
-        if (location != null) {
-            userDTO.setLocation(location);
-            response.put("location", userDTO.getLocation());
-        }
-
-        if (password != null) {
-            userDTO.setPassword(password);
-        }
-
-        userService.updateUser(userDTO);
-        return ResponseEntity.ok(response);
+    public User patch(@PathVariable Long id, @Valid @RequestBody JsonNode patchNode) throws IOException {
+        return userService.patch(id, patchNode);
     }
 
 //

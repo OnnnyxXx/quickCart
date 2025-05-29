@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,8 +35,9 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
-        return authService.login(loginRequest, request);
+    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest,
+                                        HttpServletRequest request, HttpServletResponse response) {
+        return authService.login(loginRequest, request, response);
     }
 
     @PostMapping("/signup")
@@ -52,8 +52,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        authService.logout(request, response, authentication);
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        authService.logout(request, response);
     }
 
 }
