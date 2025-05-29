@@ -15,9 +15,9 @@ jobs:
       db:
         image: postgres:14
         env:
-          POSTGRES_USER: myuser
-          POSTGRES_PASSWORD: mypassword
-          POSTGRES_DB: mydatabase
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: database
         ports:
           - 5432:5432
         options: >-
