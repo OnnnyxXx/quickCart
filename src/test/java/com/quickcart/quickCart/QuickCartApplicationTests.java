@@ -75,7 +75,7 @@ class QuickCartApplicationTests {
         String patchNode = """
                 {
                     "location": "Сочи",
-                    "password": "|@)$)___+_-@*&&&$@!f"
+                    "password": "|@)$)___+_-@*&&&$@!f",
                 }""";
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/users/update/" + savedUser.getId())

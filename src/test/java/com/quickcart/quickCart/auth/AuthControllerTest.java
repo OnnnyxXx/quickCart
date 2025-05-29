@@ -43,7 +43,7 @@ public class AuthControllerTest {
                     "username": "Test",
                     "password": "29=417|KL?_@*",
                     "email": "t@gmail.com",
-                    "location": "Moscow"
+                    "location": "Moscow",
                 }""";
 
         mockMvc.perform(post("/api/v1/auth/signup")
