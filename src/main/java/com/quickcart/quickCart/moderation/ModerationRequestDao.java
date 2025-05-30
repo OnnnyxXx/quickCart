@@ -1,7 +1,6 @@
 package com.quickcart.quickCart.moderation;
 
 import com.quickcart.quickCart.moderation.dto.ModerationDto;
-import com.quickcart.quickCart.store.Store;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
