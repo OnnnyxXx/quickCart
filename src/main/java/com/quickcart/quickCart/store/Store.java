@@ -36,12 +36,12 @@ public class Store {
     private int rating;
 
     @Enumerated(EnumType.STRING)
-    private StoreStatus status; // Статус магазина (например, "активен", "на модерации", "заблокирован")
+    private StoreStatus status = StoreStatus.PENDING;// Статус магазина (например, "активен", "на модерации", "заблокирован")
+
     private String logoUrl;
 
     @OneToMany(mappedBy = "store")
     private List<Product> products;
-
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_id")

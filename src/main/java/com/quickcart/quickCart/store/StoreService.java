@@ -2,7 +2,6 @@ package com.quickcart.quickCart.store;
 
 import com.quickcart.quickCart.moderation.ModerationRequest;
 import com.quickcart.quickCart.moderation.ModerationRequestDao;
-import com.quickcart.quickCart.moderation.ModerationRequestStatus;
 import com.quickcart.quickCart.store.dto.StoreDto;
 import com.quickcart.quickCart.store.dto.StoreDtoUpdate;
 import com.quickcart.quickCart.store.dto.StoreWithUserDto;
@@ -33,10 +32,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class StoreService {
@@ -65,33 +61,38 @@ public class StoreService {
 
         User currentUser = currentUserOP.get();
         String storeName = storeDTO.getName();
-        ModerationRequestStatus status = moderationRequestDao.getStatusByStoreName(storeName);
+        Optional<String> statusStringOpt = moderationRequestDao.getStatusStringByStoreName(storeName);
+        Store.StoreStatus status = statusStringOpt.map(Store.StoreStatus::valueOf).orElse(null);
+
+        if (status != null) {
+            switch (status) {
+                case ACTIVE:
+                    logger.info("Магазин уже активен: {}", storeName);
+                    return; // Завершаем выполнение, если магазин активен
+                case BLOCKED:
+                    logger.warn("Попытка регистрации заблокированного магазина: {}", storeName);
+                    throw new IllegalArgumentException("Магазин заблокирован, регистрация невозможна.");
+                case PENDING:
+                    logger.info("Заявка уже существует: {}", storeName);
+                    throw new IllegalArgumentException("Попытка регистрации магазина с активной заявкой на модерацию");
+                default:
+                    break; // Ничего не делаем, если статус не определён
+            }
+        }
 
         Store store = createAndSaveStore(storeDTO, currentUser, storeDTO.getLogo());
+        createModerationRequest(storeDTO, currentUser, storeName, store.getLogoUrl());
 
-
-        if (status == ModerationRequestStatus.ACTIVE) {
-            logger.info("Магазин уже активен: {}", storeName);
-        } else if (status == ModerationRequestStatus.BLOCKED) {
-            logger.warn("Попытка регистрации заблокированного магазина: {}", storeName);
-            throw new IllegalArgumentException("Магазин заблокирован, регистрация невозможна.");
-        } else if (status == ModerationRequestStatus.PENDING) {
-            logger.info("Заявка уже существует: {}", storeName);
-            throw new IllegalArgumentException("Попытка регистрации магазина с активной заявкой на модерацию");
-        } else {
-            createModerationRequest(storeDTO, currentUser, storeName, store.getLogoUrl());
-            logger.info("Магазин передан на модерацию: {}", storeName);
-        }
+        logger.info("Магазин передан на модерацию: {}", storeName);
         logger.info("Магазин успешно зарегистрирован: {}", storeName);
     }
 
-
-    private Store createAndSaveStore(StoreDto storeDTO, User currentUser, String status, MultipartFile logo) {
+    private Store createAndSaveStore(StoreDto storeDTO, User currentUser, MultipartFile logo) {
         Store store = new Store();
         store.setName(storeDTO.getName());
         store.setDescription(storeDTO.getDescription());
         store.setLocation(storeDTO.getLocation());
-        store.setStatus(Store.StoreStatus.valueOf(status));
+        store.setStatus(Store.StoreStatus.PENDING);
         store.setRating(0);
         store.setWorkingHours(storeDTO.getWorkingHours());
 
@@ -104,11 +105,6 @@ public class StoreService {
         return storeRepository.save(store);
     }
 
-
-    private Store createAndSaveStore(StoreDto storeDTO, User currentUser, MultipartFile logo) {
-        return createAndSaveStore(storeDTO, currentUser, Store.StoreStatus.PENDING.name(), logo);
-    }
-
     private void createModerationRequest(StoreDto storeDTO, User currentUser, String storeName, String logo) {
         ModerationRequest moderationRequest = new ModerationRequest();
         moderationRequest.setUser(currentUser);
@@ -117,13 +113,12 @@ public class StoreService {
         moderationRequest.setLocation(storeDTO.getLocation());
         moderationRequest.setDescription(storeDTO.getDescription());
         moderationRequest.setRequestDate(LocalDateTime.now());
-        moderationRequest.setStatus(Store.StoreStatus.PENDING); // Статус
+        moderationRequest.setStatus(Store.StoreStatus.PENDING);
         moderationRequestDao.save(moderationRequest);
     }
 
     public String saveLogoAsWebP(MultipartFile logo) {
         try {
-            String formatName = "webp"; // webp, png, jpg без .
             String contentType = logo.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
                 throw new IllegalArgumentException("Файл должен быть изображением.");
@@ -135,11 +130,8 @@ public class StoreService {
             }
 
             String originalFileName = logo.getOriginalFilename();
-            String sanitizedFileName = null;
-            if (originalFileName != null) {
-                sanitizedFileName = originalFileName.replaceAll("[^a-zA-Z0-9.]", "_");
-            }
-            String fileName = sanitizedFileName + "_" + UUID.randomUUID() + "." + formatName;
+            String sanitizedFileName = originalFileName != null ? originalFileName.replaceAll("[^a-zA-Z0-9.]", "_") : "logo";
+            String fileName = sanitizedFileName + "_" + UUID.randomUUID() + ".webp";
 
             File outputDir = new File("src/main/resources/static/storeLogo/");
             if (!outputDir.exists()) {
@@ -147,7 +139,7 @@ public class StoreService {
             }
 
             File outputFile = new File(outputDir, fileName);
-            ImageIO.write(bufferedImage, formatName, outputFile);
+            ImageIO.write(bufferedImage, "webp", outputFile);
 
             return fileName;
 
@@ -170,7 +162,7 @@ public class StoreService {
             }
 
             String contentDisposition = download
-                    ? "attachment; filename=\"" + resource.getFile() + "\""
+                    ? "attachment; filename=\"" + resource.getFilename() + "\""
                     : "inline; filename=\"" + resource.getFilename() + "\"";
 
             return ResponseEntity.ok()
@@ -178,6 +170,7 @@ public class StoreService {
                     .contentType(MediaType.IMAGE_JPEG)
                     .body(resource);
         } catch (Exception e) {
+            logger.error("Ошибка при получении логотипа: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -201,8 +194,8 @@ public class StoreService {
 
     @Transactional
     @Caching(evict = {
-        @CacheEvict(value = "storeAll", allEntries = true),
-        @CacheEvict(value = "store", key = "#id")
+            @CacheEvict(value = "storeAll", allEntries = true),
+            @CacheEvict(value = "store", key = "#id")
     })
     public HashMap<String, String> updateStore(Long id, StoreDtoUpdate withUserDto, MultipartFile logo) {
         Store store = storeRepository.findById(id)
