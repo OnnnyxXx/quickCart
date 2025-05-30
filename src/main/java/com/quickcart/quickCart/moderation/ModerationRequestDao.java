@@ -8,12 +8,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ModerationRequestDao extends JpaRepository<ModerationRequest, Long> {
 
     @Query(value = "SELECT status FROM store WHERE name = :name", nativeQuery = true)
-    ModerationRequestStatus getStatusByStoreName(@Param("name") String storeName);
+    Optional<String> getStatusStringByStoreName(@Param("name") String storeName);
 
     @Query("SELECT new com.quickcart.quickCart.moderation.dto.ModerationDto(" +
             "s.id, s.name, s.logoUrl, s.location, s.description, s.workingHours, s.rating, s.status, " +
