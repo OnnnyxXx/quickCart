@@ -1,5 +1,7 @@
 package com.quickcart.quickCart.order;
 
+import com.quickcart.quickCart.order.dto.OrderAnswerDTO;
+import com.quickcart.quickCart.order.dto.OrderDTO;
 import com.quickcart.quickCart.user.User;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +19,11 @@ public class OrderController {
     OrderService orderService;
 
     @PostMapping("/")
-    public ResponseEntity<Order> createOrder(@Valid @RequestBody Order order,/* @CurrentUser*/ Long userId){
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(order, userId));
+    public ResponseEntity<List<OrderDTO>> createOrder(@ModelAttribute @Valid OrderDTO orderDTO){
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(orderDTO));
     }
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Order>> getUserOrders(@PathVariable("userId") Long userId){
+    public ResponseEntity<List<OrderDTO>> getUserOrders(@PathVariable("userId") Long userId){
         return ResponseEntity.ok(orderService.getOrdersByUserId(userId));
     }
     @GetMapping("/store/{storeId}")
@@ -29,8 +31,8 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrdersByStoreId(storeId));
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrder(@PathVariable("id") Long id){
-        Order order = orderService.getOrderById(id);
+    public ResponseEntity<OrderAnswerDTO> getOrder(@PathVariable("id") Long id){
+        OrderAnswerDTO order = orderService.getOrderById(id);
         if(order == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(order);
     }

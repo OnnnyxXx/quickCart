@@ -1,5 +1,6 @@
 package com.quickcart.quickCart.product;
 
+import com.quickcart.quickCart.product.dto.ProductWithQuantityDTO;
 import com.quickcart.quickCart.store.Store;
 import com.quickcart.quickCart.store.StoreService;
 
@@ -39,12 +40,15 @@ public class ProductService {
     private static final Logger logger = LoggerFactory.getLogger(StoreService.class);
 
     final private ProductRepository productRepository;
+
+    final private OrderProductRepository orderProductRepository;
     final private UserService userService;
     final private StoreService storeService;
 
-    public ProductService(ProductRepository productRepository, UserService userService, StoreService storeService) {
+    public ProductService(OrderProductRepository orderProductRepository, ProductRepository productRepository, UserService userService, StoreService storeService) {
         super();
         this.productRepository = productRepository;
+        this.orderProductRepository = orderProductRepository;
         this.userService = userService;
         this.storeService = storeService;
     }
@@ -58,7 +62,7 @@ public class ProductService {
         Product savedProduct = productRepository.save(product);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
     }
-    private Product getProduct(ProductDTO productDTO) {
+    public Product getProduct(ProductDTO productDTO) {
         Product product = new Product();
 
         product.setName(productDTO.getName());
@@ -73,9 +77,14 @@ public class ProductService {
         }
         return product;
     }
-    private ProductDTO getProductDTO(Product product){
+
+    public Product getProduct(Long id){
+        return productRepository.findById(id).get();
+    }
+    public static ProductDTO getProductDTO(Product product){
         ProductDTO productDTO = new ProductDTO();
         productDTO.setId(product.getId());
+        productDTO.setStoreId(product.getStore().getId());
         productDTO.setName(product.getName());
         productDTO.setDescription(product.getDescription());
         productDTO.setCategory(product.getCategory());
@@ -84,6 +93,23 @@ public class ProductService {
         productDTO.setImageUrl(product.getImageUrl());
         return productDTO;
     }
+
+    public static ProductWithQuantityDTO getProductWithQuantityDTO(OrderProduct orderProduct){
+        Product product = orderProduct.getProduct();
+        ProductWithQuantityDTO productDTO = new ProductWithQuantityDTO();
+        productDTO.setId(product.getId());
+        productDTO.setStoreId(product.getStore().getId());
+        productDTO.setName(product.getName());
+        productDTO.setDescription(product.getDescription());
+        productDTO.setCategory(product.getCategory());
+        productDTO.setPrice(product.getPrice().toString());
+        productDTO.setStock(product.getStock());
+        productDTO.setImageUrl(product.getImageUrl());
+        productDTO.setQuantity(orderProduct.getQuantity());
+        return productDTO;
+    }
+
+
 
     @Cacheable(value = "products", key = "#storeId")
     public List<ProductDTO> getProductsByStoreId(Long storeId) {
@@ -210,5 +236,11 @@ public class ProductService {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @Transactional
+    public OrderProduct createOrderProduct(OrderProduct orderProduct){
+        OrderProduct savedProduct = orderProductRepository.save(orderProduct);
+        return savedProduct;
     }
 }
