@@ -1,12 +1,10 @@
 package com.quickcart.quickCart.store;
 
-import com.quickcart.quickCart.securityService.StoreSecurityService;
 import com.quickcart.quickCart.store.dto.StoreDto;
 import com.quickcart.quickCart.store.dto.StoreDtoUpdate;
 import com.quickcart.quickCart.store.dto.StoreWithUserDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,12 +19,6 @@ import java.util.List;
 @RestController
 @RequestMapping("api/v1/store")
 public class StoreController {
-
-    @Autowired
-    private StoreSecurityService storeSecurityService;
-
-    @Autowired
-    private StoreRepository storeRepository;
 
     private final StoreService storeService;
 

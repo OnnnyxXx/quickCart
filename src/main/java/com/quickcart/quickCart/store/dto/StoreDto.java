@@ -1,5 +1,6 @@
 package com.quickcart.quickCart.store.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.quickcart.quickCart.store.Store;
 import com.quickcart.quickCart.user.User;
@@ -16,18 +17,21 @@ import org.springframework.web.multipart.MultipartFile;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StoreDto {
 
-    private Long userId;
     private Long id;
+
+    @JsonIgnore
+    private Long userId;
+
+    @JsonIgnore
     private User user;
 
-    @NotBlank(message = "Name is required")
-    @Size(min = 2, max = 35)
+    @Size(min = 2, max = 35, message = "Размер от 2 до 35")
     private String name;
 
-    @NotBlank(message = "Location is required")
+    @NotBlank(message = "Локация обязательно")
     private String location;
 
-    @NotBlank(message = "Description is required")
+    @NotBlank(message = "Описание обязательно")
     @Size(min = 3, max = 255)
     private String description;
 
