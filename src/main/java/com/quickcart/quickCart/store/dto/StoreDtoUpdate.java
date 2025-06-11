@@ -1,6 +1,5 @@
 package com.quickcart.quickCart.store.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
