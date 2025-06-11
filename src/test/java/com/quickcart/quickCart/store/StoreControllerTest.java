@@ -66,12 +66,6 @@ public class StoreControllerTest {
     @Order(2)
     public void registerStore() throws Exception {
         mockMvc.perform(post("/api/v1/store/register")
-                        .param("users", """
-                                {
-                                    "username": "Test",
-                                    "email": "t@gmail.com",
-                                    "location": "Moscow"
-                                }""")
                         .param("name", "Хоз-Товары")
                         .param("location", "Сочи")
                         .param("description", "Без обмана \uD83D\uDE01")
