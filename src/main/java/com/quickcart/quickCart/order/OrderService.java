@@ -10,6 +10,7 @@ import com.quickcart.quickCart.store.StoreService;
 import com.quickcart.quickCart.user.User;
 import com.quickcart.quickCart.user.UserRepository;
 import com.quickcart.quickCart.user.UserService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
 import com.google.gson.Gson;
@@ -51,6 +52,7 @@ public class OrderService {
 
     }
 
+    @Transactional
     public List<OrderDTO> createOrder(@Valid OrderDTO orderDTO) {
         long userId = orderDTO.getUserId();
         User user = userRepository.findById(userId)
@@ -76,8 +78,7 @@ public class OrderService {
         for(Long key: mapProducts.keySet()){
             Order order = new Order();
             Store store = storeService.getStoreById(key);
-            if(store == null) new ResponseStatusException(HttpStatus.NOT_FOUND, "Магазин с id " + key + " не найден.");
-            else order.setStore(store);
+            order.setStore(store);
             order.setOrderDate(LocalDateTime.now());
             order.setUser(user);
             List<OrderProduct> orderProducts = mapProducts.get(key).stream().map((item) -> {
@@ -106,6 +107,7 @@ public class OrderService {
             currentDTO = new OrderDTO(
                     order.getId(),
                     order.getUser().getId(),
+                    order.getStore().getId(),
                     order.getDeliveryAddress(),
                     order.getPaymentMethod(),
                     order.getOrderDate().toString(),

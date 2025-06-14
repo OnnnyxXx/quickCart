@@ -46,9 +46,10 @@ public class OrderDTO {
 
     }
 
-    public OrderDTO(Long id, Long userId, String deliveryAddress, String paymentMethod, String orderDate, String status){
+    public OrderDTO(Long id, Long userId, Long storeId, String deliveryAddress, String paymentMethod, String orderDate, String status){
         this.id = id;
         this.userId = userId;
+        this.storeId = storeId;
         this.deliveryAddress = deliveryAddress;
         this.paymentMethod = paymentMethod;
         this.orderDate = orderDate;

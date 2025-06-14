@@ -243,8 +243,8 @@ public class StoreService {
     }
 
     public Store getStoreById(Long storeId) {
-        Optional<Store> store = storeRepository.findById(storeId);
-        return store.orElse(null);
+        Store store = storeRepository.findById(storeId).orElseThrow(() ->new ResponseStatusException(HttpStatus.NOT_FOUND, "Магазин с id " + storeId + " не найден."));
+        return store;
     }
 
 }

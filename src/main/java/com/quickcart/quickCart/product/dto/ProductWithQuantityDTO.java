@@ -27,7 +27,6 @@ public class ProductWithQuantityDTO {
     private String description;
 
     @NotBlank
-    @Min(0)
     private String price;
 
     @NotBlank(message = "Необходимо указать категорию")
