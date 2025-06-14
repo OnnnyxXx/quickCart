@@ -1,6 +1,6 @@
 package com.quickcart.quickCart.user;
 
-import com.quickcart.quickCart.user.auth.dto.UserDtoInfo;
+import com.quickcart.quickCart.auth.dto.UserDtoInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -18,12 +18,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "SELECT * FROM users WHERE name= :name", nativeQuery = true)
     Optional<User> findByName(String name);
 
-    @Query("SELECT new com.quickcart.quickCart.user.auth.dto.UserDtoInfo(" +
+    @Query("SELECT new com.quickcart.quickCart.auth.dto.UserDtoInfo(" +
             "u.id, u.username, u.email, u.location, u.role) " +
             "FROM User u WHERE u.email = :email")
     Optional<UserDtoInfo> findInfoByEmail(String email);
 
-    @Query("SELECT new com.quickcart.quickCart.user.auth.dto.UserDtoInfo(" +
+    @Query("SELECT new com.quickcart.quickCart.auth.dto.UserDtoInfo(" +
             "u.id, u.username, u.email, u.location, u.role) " +
             "FROM User u WHERE u.id = :id")
     Optional<UserDtoInfo> findInfoById(Long id);

@@ -18,7 +18,7 @@ public class StoreSecurityService {
 
     public boolean isOwner(Long storeId, String userEmail) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Store not found with id " + storeId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Магазин не найден " + storeId));
         return store.getUser().getEmail().equals(userEmail);
     }
 }

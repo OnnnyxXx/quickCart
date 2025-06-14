@@ -1,5 +1,9 @@
 package com.quickcart.quickCart.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.quickcart.quickCart.moderation.ModerationRequest;
+import com.quickcart.quickCart.store.Store;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -7,6 +11,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Setter
 @Getter
@@ -23,6 +30,7 @@ public class User {
     @Size(min = 3, max = 20)
     private String username;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotBlank(message = "Password is required")
     @Size(min = 6, max = 100)
     private String password;
@@ -37,6 +45,16 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    // Добавляем связь с заявками модерации
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<ModerationRequest> moderationRequests = new ArrayList<>();
+
+    // Добавляем связь с магазинами
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Store> stores = new ArrayList<>();
 
     public User(Long id, String username, String password, String email, String location, int rating, Role role) {
         this.id = id;

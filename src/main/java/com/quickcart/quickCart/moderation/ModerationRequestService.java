@@ -1,13 +1,14 @@
 package com.quickcart.quickCart.moderation;
 
-import com.quickcart.quickCart.moderation.dto.ModerationDTO;
-import com.quickcart.quickCart.moderation.dto.ModerationRequestDTO;
+import com.quickcart.quickCart.moderation.dto.ModerationDto;
+import com.quickcart.quickCart.moderation.dto.ModerationRequestDto;
 import com.quickcart.quickCart.store.Store;
 import com.quickcart.quickCart.store.StoreRepository;
 import com.quickcart.quickCart.user.User;
 import com.quickcart.quickCart.user.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -33,15 +34,15 @@ public class ModerationRequestService {
     }
 
 
-    public Map<User, List<ModerationDTO>> getStores() {
+    public Map<User, List<ModerationDto>> getStores() {
         try {
             List<User> userAdmin = userRepository.getModer();
             Pageable twenty = PageRequest.of(0, 20); // Limit
-            List<ModerationDTO> moderationRequestDaoList = moderationRequestDao.getStores(twenty);
+            List<ModerationDto> moderationRequestDaoList = moderationRequestDao.getStores(twenty);
 
-            Map<User, List<ModerationDTO>> adminRequestsMap = new HashMap<>();
+            Map<User, List<ModerationDto>> adminRequestsMap = new HashMap<>();
 
-            if(userAdmin.isEmpty()){
+            if (userAdmin.isEmpty()){
                 return adminRequestsMap;
             }
 
@@ -61,7 +62,7 @@ public class ModerationRequestService {
 
     }
 
-    public List<ModerationDTO> getStoresForModer() {
+    public List<ModerationDto> getStoresForModer() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentModerEmail = authentication.getName();
 
@@ -71,26 +72,27 @@ public class ModerationRequestService {
         }
 
         User currentAdmin = currentModerOpt.get();
-        Map<User, List<ModerationDTO>> moderRequestsMap = getStores();
-        List<ModerationDTO> currentModerRequests = moderRequestsMap.getOrDefault(currentAdmin, Collections.emptyList());
+        Map<User, List<ModerationDto>> moderRequestsMap = getStores();
 
-        return currentModerRequests;
+        return moderRequestsMap.getOrDefault(currentAdmin, Collections.emptyList());
     }
 
-
-    @CacheEvict(value = "allStore", allEntries = true)
     @Transactional
-    public HashMap<String, String> changeStoreStatus(Long id, ModerationRequestDTO moderationDTO) {
+    @Caching(evict = {
+        @CacheEvict(value = "storeAll", allEntries = true),
+        @CacheEvict(value = "store", key = "#id")
+    })
+    public HashMap<String, String> changeStoreStatus(Long id, ModerationRequestDto moderationDTO) {
 
         if (moderationDTO == null || moderationDTO.getStatus() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status must not be null");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Статус не должен быть пустым");
         }
 
         Store store = storeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Store not found with id " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден " + id));
 
         ModerationRequest moderationRequest = moderationRequestDao.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Moderation request not found with id " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Запрос на модерацию не найден " + id));
 
         store.setStatus(moderationDTO.getStatus());
         store.getUser().setRole(moderationDTO.getStatus() == Store.StoreStatus.ACTIVE ? User.Role.SELLER : User.Role.BUYER);

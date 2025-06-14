@@ -1,4 +1,4 @@
-package com.quickcart.quickCart.user.auth.dto;
+package com.quickcart.quickCart.auth.dto;
 
 import com.quickcart.quickCart.user.User;
 import jakarta.validation.constraints.Email;
@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserDTO {
+public class UserDto {
     // Рейтинг???
     private Long id;
 
@@ -29,10 +29,10 @@ public class UserDTO {
 
     private User.Role role;
 
-    public UserDTO() {
+    public UserDto() {
     }
 
-    public UserDTO(Long id, String username, String email, String location, User.Role role) {
+    public UserDto(Long id, String username, String email, String location, User.Role role) {
         this.id = id;
         this.username = username;
         this.email = email;

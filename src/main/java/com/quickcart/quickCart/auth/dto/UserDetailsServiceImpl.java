@@ -1,4 +1,4 @@
-package com.quickcart.quickCart.user.auth.dto;
+package com.quickcart.quickCart.auth.dto;
 
 import com.quickcart.quickCart.user.User;
 import com.quickcart.quickCart.user.UserRepository;
@@ -26,7 +26,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Optional<User> userOptional = userRepository.findByEmail(email);
         User user = userOptional.orElseThrow(() ->
-                new UsernameNotFoundException("User not found with email: " + email)
+                new UsernameNotFoundException("Пользователь не найден: " + email)
         );
 
         return new org.springframework.security.core.userdetails.User(

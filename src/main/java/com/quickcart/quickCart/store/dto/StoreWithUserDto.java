@@ -1,6 +1,6 @@
 package com.quickcart.quickCart.store.dto;
 
-import com.quickcart.quickCart.user.auth.dto.UserDtoInfo;
+import com.quickcart.quickCart.auth.dto.UserDtoInfo;
 import lombok.Getter;
 import lombok.Setter;
 

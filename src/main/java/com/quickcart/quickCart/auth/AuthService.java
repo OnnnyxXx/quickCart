@@ -1,10 +1,9 @@
-package com.quickcart.quickCart.user.auth;
+package com.quickcart.quickCart.auth;
 
 import com.quickcart.quickCart.user.User;
 import com.quickcart.quickCart.user.UserRepository;
-import com.quickcart.quickCart.user.auth.dto.LoginRequest;
-import com.quickcart.quickCart.user.auth.dto.UserDTO;
-import com.quickcart.quickCart.user.auth.dto.UserDetailsServiceImpl;
+import com.quickcart.quickCart.auth.dto.LoginRequest;
+import com.quickcart.quickCart.auth.dto.UserDto;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,13 +30,14 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, UserDetailsServiceImpl userDetailsService) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                       AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
     }
 
-    public void registerUser(UserDTO userDTO) {
+    public void registerUser(UserDto userDTO) {
         User user = new User();
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
@@ -53,7 +53,8 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request,
+                                        HttpServletResponse response) {
         try {
             Authentication authenticationRequest =
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
@@ -65,13 +66,19 @@ public class AuthService {
             HttpSession session = request.getSession();
             session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
-            return new ResponseEntity<>("User signed-in successfully!.", HttpStatus.OK);
+            // Установка cookie
+            Cookie cookie = new Cookie("sessionId", session.getId());
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            response.addCookie(cookie);
+
+            return new ResponseEntity<>("Пользователь успешно вошел в систему!.", HttpStatus.OK);
         } catch (AuthenticationException e) {
-            return new ResponseEntity<>("Invalid email or password.", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("Неверный адрес электронной почты или пароль.", HttpStatus.BAD_REQUEST);
         }
     }
 
-    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
         boolean isSecure = false;
         String contextPath = null;
         if (request != null) {

@@ -18,7 +18,7 @@ public class UserSecurityService {
 
     public boolean isYou(Long userId, String userEmail) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
         return user.getEmail().equals(userEmail);
     }
 }
