@@ -75,7 +75,6 @@ public class StoreControllerTest {
                 .andDo(print());
     }
 
-
     @Test
     @Order(3)
     public void registerStoreError() throws Exception {
@@ -95,7 +94,7 @@ public class StoreControllerTest {
 
     @Test
     public void updateStore() throws Exception {
-        mockMvc.perform(patch("/api/v1/store/update/1")
+        mockMvc.perform(patch("/api/v1/store/update/2")
                         .param("storeWorkingHours", "09:00 до 21:00")
                         .param("status", "ACTIVE")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -106,7 +105,7 @@ public class StoreControllerTest {
 
     @Test
     public void updateStoreError() throws Exception {
-        mockMvc.perform(patch("/api/v1/store/update/1")
+        mockMvc.perform(patch("/api/v1/store/update/2")
                         .param("storeName", "1")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
@@ -116,7 +115,7 @@ public class StoreControllerTest {
 
     @Test
     public void storeDTO() throws Exception {
-        mockMvc.perform(get("/api/v1/store/1")
+        mockMvc.perform(get("/api/v1/store/2")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
                 .andExpect(status().isOk())

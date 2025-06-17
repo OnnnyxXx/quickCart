@@ -6,6 +6,7 @@ import com.quickcart.quickCart.auth.dto.UserDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,6 @@ public class AuthController {
         this.authService = authService;
     }
 
-
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest,
                                         HttpServletRequest request, HttpServletResponse response) {
@@ -41,7 +41,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody UserDto signupRequest) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody UserDto signupRequest) {
         // проверка что мыла нет в базе
         if (userRepository.findByEmail(signupRequest.getEmail()).isPresent()) {
             return new ResponseEntity<>("Электронная почта уже используется.", HttpStatus.CONFLICT);

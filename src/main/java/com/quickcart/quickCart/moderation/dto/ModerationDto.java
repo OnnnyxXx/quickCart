@@ -4,12 +4,16 @@ import com.quickcart.quickCart.store.Store;
 import com.quickcart.quickCart.auth.dto.UserDtoInfo;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class ModerationDto {
     private Long storeId;
     private String storeName;
@@ -23,19 +27,4 @@ public class ModerationDto {
     private Store.StoreStatus storeStatus;
 
     private UserDtoInfo userDtoInfo;
-
-    public ModerationDto() {
-    }
-
-    public ModerationDto(Long storeId, String storeName, String logoUrl, String storeLocation, String storeDescription, String storeWorkingHours, int storeRating, Store.StoreStatus storeStatus, UserDtoInfo userDtoInfo) {
-        this.storeId = storeId;
-        this.storeName = storeName;
-        this.logoUrl = logoUrl;
-        this.storeLocation = storeLocation;
-        this.storeDescription = storeDescription;
-        this.storeWorkingHours = storeWorkingHours;
-        this.storeRating = storeRating;
-        this.storeStatus = storeStatus;
-        this.userDtoInfo = userDtoInfo;
-    }
 }
