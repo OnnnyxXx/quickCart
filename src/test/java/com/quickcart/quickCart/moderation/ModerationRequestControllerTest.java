@@ -22,7 +22,6 @@ public class ModerationRequestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private UserRepository userRepository;
 
@@ -147,6 +146,40 @@ public class ModerationRequestControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * <h1>Clearing Redis Cache<h1/>
+     * If you don't do this, then when you run the test again,
+     * the noStoreList() endpoint will access the cache and cause an error in the logic.
+    */
+
+    @Test
+    @Order(7)
+    public void changeOfStatusBlock() throws Exception {
+        String moderationDTO = """
+                {
+                    "status": "BLOCKED"
+                }""";
+
+        mockMvc.perform(patch("/api/v1/moderation/manage/store/1")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.user(savedUser.getEmail())
+                                .authorities(new SimpleGrantedAuthority("MODER")))
+                        .content(moderationDTO)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    @Order(8)
+    public void storeListClear() throws Exception {
+        mockMvc.perform(get("/api/v1/store/all/store")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string("[]"))
+                .andDo(print());
+    }
+
     /// <h1>--------------  NEGATIVE TEST --------------------</h1>
 
     @Test
@@ -157,7 +190,7 @@ public class ModerationRequestControllerTest {
                 {
                     "username": "T",
                     "password": "t",
-                    "email": "tesifrest",
+                    "email": "tesifrest"
                 }
                 """;
 
@@ -189,6 +222,22 @@ public class ModerationRequestControllerTest {
                         .with(SecurityMockMvcRequestPostProcessors.user("tesifrest@gmail.com"))
                 )
                 .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @Test
+    public void changeOfStatusError() throws Exception {
+        String moderationDTO = """
+                {
+                    "status": "BLOCKED"
+                }""";
+
+        mockMvc.perform(patch("/api/v1/moderation/manage/store/1")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.user("testing@gmail.com"))
+                        .content(moderationDTO)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
                 .andDo(print());
     }
 }
