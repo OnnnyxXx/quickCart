@@ -22,13 +22,14 @@ public class ModerationRequestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private UserRepository userRepository;
 
     private User savedUser;
 
     @BeforeEach
-    public void setup() throws Exception {
+    public void setup() {
 
         if (userRepository.findByEmail("moder@gmail.com").isEmpty()) {
             User moderUser = new User();
@@ -77,7 +78,7 @@ public class ModerationRequestControllerTest {
 
         // Регистрация магазина
         mockMvc.perform(post("/api/v1/store/register")
-                        .param("name", "Хоз-Товары")
+                        .param("name", "quickCart")
                         .param("location", "Сочи")
                         .param("description", "Без обмана \uD83D\uDE01")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
