@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,8 +41,7 @@ public class ModerationRequestService {
                 return Collections.emptyMap();
             }
 
-            Pageable pageable = PageRequest.of(0, 20);
-            List<ModerationDto> moderationRequests = moderationRequestDao.getStores(pageable);
+            List<ModerationDto> moderationRequests = moderationRequestDao.getStores();
 
             Map<User, List<ModerationDto>> requestsByModerator = new HashMap<>();
             for (User moderator : moderators) {

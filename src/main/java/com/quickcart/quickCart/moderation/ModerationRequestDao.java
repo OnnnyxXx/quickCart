@@ -1,7 +1,6 @@
 package com.quickcart.quickCart.moderation;
 
 import com.quickcart.quickCart.moderation.dto.ModerationDto;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,7 +19,7 @@ public interface ModerationRequestDao extends JpaRepository<ModerationRequest, L
             "s.id, s.name, s.logoUrl, s.location, s.description, s.workingHours, s.rating, s.status, " +
             "new com.quickcart.quickCart.auth.dto.UserDtoInfo(u.id, u.username, u.email, u.location, u.role)) " +
             "FROM Store s JOIN s.user u")
-    List<ModerationDto> getStores(Pageable pageable);
+    List<ModerationDto> getStores();
 
     @Query("SELECT new com.quickcart.quickCart.moderation.dto.ModerationDto(" +
             "s.id, s.name, s.logoUrl, s.location, s.description, s.workingHours, s.rating, s.status, " +
