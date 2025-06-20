@@ -24,13 +24,11 @@ public class ModerationRequestController {
         this.moderationRequestService = moderationRequestService;
     }
 
-
     @GetMapping("/admin/store")
     public ResponseEntity<Map<User, List<ModerationDto>>> storeAll() {
         Map<User, List<ModerationDto>> stores = moderationRequestService.getStores();
         return ResponseEntity.ok(stores);
     }
-
 
     @GetMapping("/manage/store")
     public ResponseEntity<List<ModerationDto>> getStoresForModer() {
@@ -38,10 +36,10 @@ public class ModerationRequestController {
         return ResponseEntity.ok(stores);
     }
 
-
     @PatchMapping("/manage/store/{id}")
-    public HashMap<String, String> changeOfStatus(@PathVariable("id") Long id,
-                                                  @Valid @RequestBody ModerationRequestDto moderationDTO) {
+    public HashMap<String, String> changeOfStatus(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody ModerationRequestDto moderationDTO) {
         return moderationRequestService.changeStoreStatus(id, moderationDTO);
     }
 
