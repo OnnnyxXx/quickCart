@@ -3,7 +3,6 @@ package com.quickcart.quickCart.order;
 import com.quickcart.quickCart.order.dto.OrderAnswerDTO;
 import com.quickcart.quickCart.order.dto.OrderDTO;
 import com.quickcart.quickCart.product.*;
-import com.quickcart.quickCart.product.dto.ProductDTO;
 import com.quickcart.quickCart.product.dto.ProductWithQuantityDTO;
 import com.quickcart.quickCart.store.Store;
 import com.quickcart.quickCart.store.StoreService;
@@ -15,11 +14,14 @@ import jakarta.validation.Valid;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
 
-import org.springframework.data.domain.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -27,7 +29,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+@EnableCaching
 public class OrderService {
+
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
 
     OrderRepository orderRepository;
     UserService userService;
@@ -101,6 +106,10 @@ public class OrderService {
 
     public List<OrderDTO> getOrdersByUserId(Long userId) {
         List<Order> orderList = orderRepository.findAllByUserId(userId);
+        return getOrdersDTO(orderList);
+    }
+
+    public List<OrderDTO> getOrdersDTO(List<Order> orderList){
         List<OrderDTO> dtoList = new ArrayList<>();
         OrderDTO currentDTO;
         for(Order order: orderList){
@@ -118,13 +127,30 @@ public class OrderService {
         return dtoList;
     }
 
+    @Cacheable(value = "order", key = "#id")
     public OrderAnswerDTO getOrderById(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Заказ с " + id + " не найден."));
         return new OrderAnswerDTO(order);
     }
 
-    public List<Order> getOrdersByStoreId(Long storeId) {
-        return orderRepository.findByStoreId(storeId);
+    @Cacheable(value = "orderByStore", key = "#storeId")
+    public List<OrderDTO> getOrdersByStoreId(Long storeId) {
+        List<Order> orderList = orderRepository.findByStoreId(storeId);
+        return getOrdersDTO(orderList);
+    }
+
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "orderByStore", allEntries = true),
+            @CacheEvict(value = "order", key = "#id")
+    })
+    public String updateOrderStatus(Long id, Order.OrderStatus status){
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Заказ с " + id + " не найден."));
+        order.setStatus(status);
+        orderRepository.save(order);
+        logger.info("Updating order with id: {}", id);
+        return status.toString();
     }
 }

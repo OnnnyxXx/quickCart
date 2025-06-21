@@ -2,7 +2,6 @@ package com.quickcart.quickCart.order;
 
 import com.quickcart.quickCart.order.dto.OrderAnswerDTO;
 import com.quickcart.quickCart.order.dto.OrderDTO;
-import com.quickcart.quickCart.user.User;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,7 +26,7 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrdersByUserId(userId));
     }
     @GetMapping("/store/{storeId}")
-    public ResponseEntity<List<Order>> getStoreOrders(@PathVariable("storeId") Long storeId){
+    public ResponseEntity<List<OrderDTO>> getStoreOrders(@PathVariable("storeId") Long storeId){
         return ResponseEntity.ok(orderService.getOrdersByStoreId(storeId));
     }
     @GetMapping("/{id}")
