@@ -1,5 +1,7 @@
 package com.quickcart.quickCart.store;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -7,11 +9,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Test class for the {@link StoreController}
@@ -24,22 +26,19 @@ public class StoreControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @BeforeEach
-    public void setup() {
-
-    }
-
-    String signupRequest = """
-            {
-                "username": "Test",
-                "password": "29=417|KL?_@*",
-                "email": "t@gmail.com",
-                "location": "Moscow"
-            }""";
+    private Long storeId; // хранения ID магазина
 
     @Test
     @Order(1)
     public void login() throws Exception {
+
+        String signupRequest = """
+                {
+                    "username": "Test",
+                    "password": "29=417|KL?_@*",
+                    "email": "t@gmail.com",
+                    "location": "Moscow"
+                }""";
 
         // Регистрация пользователя
         mockMvc.perform(post("/api/v1/auth/signup")
@@ -47,7 +46,7 @@ public class StoreControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
-        // Попытка входа
+        // Вход в систему
         String loginRequest = """
                 {
                     "email": "t@gmail.com",
@@ -75,9 +74,7 @@ public class StoreControllerTest {
                 .andDo(print());
     }
 
-
     @Test
-    @Order(3)
     public void registerStoreError() throws Exception {
         mockMvc.perform(post("/api/v1/store/register")
                         .param("users", """
@@ -94,8 +91,27 @@ public class StoreControllerTest {
     }
 
     @Test
+    public void myStore() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/v1/store/my/store")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        String responseContent = result.getResponse().getContentAsString();
+        System.out.println("RESULT -> " + responseContent);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonNode = mapper.readTree(responseContent);
+
+        this.storeId = jsonNode.get(0).get("id").asLong();
+    }
+
+    @Test
     public void updateStore() throws Exception {
-        mockMvc.perform(patch("/api/v1/store/update/1")
+        myStore();
+
+        mockMvc.perform(patch("/api/v1/store/update/" + storeId)
                         .param("storeWorkingHours", "09:00 до 21:00")
                         .param("status", "ACTIVE")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -106,7 +122,7 @@ public class StoreControllerTest {
 
     @Test
     public void updateStoreError() throws Exception {
-        mockMvc.perform(patch("/api/v1/store/update/1")
+        mockMvc.perform(patch("/api/v1/store/update/" + storeId)
                         .param("storeName", "1")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
@@ -116,7 +132,9 @@ public class StoreControllerTest {
 
     @Test
     public void storeDTO() throws Exception {
-        mockMvc.perform(get("/api/v1/store/1")
+        myStore();
+
+        mockMvc.perform(get("/api/v1/store/" + storeId)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
                 .andExpect(status().isOk())
@@ -129,15 +147,7 @@ public class StoreControllerTest {
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
                 .andExpect(status().isOk())
-                .andDo(print());
-    }
-
-    @Test
-    public void myStore() throws Exception {
-        mockMvc.perform(get("/api/v1/store/my/store")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
-                .andExpect(status().isOk())
+                .andExpect(content().string("[]"))
                 .andDo(print());
     }
 

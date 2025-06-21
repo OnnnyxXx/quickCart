@@ -13,16 +13,16 @@ public class UserDto {
     // Рейтинг???
     private Long id;
 
-    @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 20)
+    @NotBlank(message = "Требуется указать имя пользователя")
+    @Size(min = 3, max = 20, message = "Имя пользователя должно быть длиной от 3 до 20 символов")
     private String username;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, max = 100)
+    @NotBlank(message = "Требуется указать пароль")
+    @Size(min = 6, max = 100, message = "Пароль должен быть длиной от 6 до 100 символов")
     private String password;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Email should be valid")
+    @NotBlank(message = "Требуется указать email")
+    @Email(message = "Email должен быть корректным")
     private String email;
 
     private String location;

@@ -68,13 +68,14 @@ public class StoreService {
             switch (status) {
                 case ACTIVE:
                     logger.info("Магазин уже активен: {}", storeName);
-                    return; // Завершаем выполнение, если магазин активен
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Магазин уже активен: " + storeName);
                 case BLOCKED:
                     logger.warn("Попытка регистрации заблокированного магазина: {}", storeName);
-                    throw new IllegalArgumentException("Магазин заблокирован, регистрация невозможна.");
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Магазин заблокирован, регистрация невозможна.");
                 case PENDING:
                     logger.info("Заявка уже существует: {}", storeName);
-                    throw new IllegalArgumentException("Попытка регистрации магазина с активной заявкой на модерацию");
+                    throw new ResponseStatusException(HttpStatus.CONFLICT,
+                            "Попытка регистрации магазина с активной заявкой на модерацию" );
                 default:
                     break; // Ничего не делаем, если статус не определён
             }

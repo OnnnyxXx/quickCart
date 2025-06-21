@@ -7,21 +7,22 @@ import com.quickcart.quickCart.store.StoreRepository;
 import com.quickcart.quickCart.user.User;
 import com.quickcart.quickCart.user.UserRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-
 import java.util.*;
 
 @Service
 public class ModerationRequestService {
+
+    Logger logger = LoggerFactory.getLogger(ModerationRequestService.class);
 
     private final StoreRepository storeRepository;
     private final ModerationRequestDao moderationRequestDao;
@@ -33,33 +34,31 @@ public class ModerationRequestService {
         this.userRepository = userRepository;
     }
 
-
     public Map<User, List<ModerationDto>> getStores() {
         try {
-            List<User> userAdmin = userRepository.getModer();
-            Pageable twenty = PageRequest.of(0, 20); // Limit
-            List<ModerationDto> moderationRequestDaoList = moderationRequestDao.getStores(twenty);
-
-            Map<User, List<ModerationDto>> adminRequestsMap = new HashMap<>();
-
-            if (userAdmin.isEmpty()){
-                return adminRequestsMap;
+            List<User> moderators = userRepository.getModer();
+            if (moderators == null || moderators.isEmpty()) {
+                return Collections.emptyMap();
             }
 
-            for (User admin : userAdmin) {
-                adminRequestsMap.put(admin, new ArrayList<>());
+            List<ModerationDto> moderationRequests = moderationRequestDao.getStores();
+
+            Map<User, List<ModerationDto>> requestsByModerator = new HashMap<>();
+            for (User moderator : moderators) {
+                requestsByModerator.put(moderator, new ArrayList<>());
             }
 
-            for (int i = 0; i < moderationRequestDaoList.size(); i++) {
-                User assignedAdmin = userAdmin.get(i % userAdmin.size());
-                adminRequestsMap.get(assignedAdmin).add(moderationRequestDaoList.get(i));
+            int moderatorCount = moderators.size();
+            for (int i = 0; i < moderationRequests.size(); i++) {
+                User assignedModerator = moderators.get(i % moderatorCount);
+                requestsByModerator.get(assignedModerator).add(moderationRequests.get(i));
             }
 
-            return adminRequestsMap;
-        }catch (Exception e){
+            return requestsByModerator;
+        } catch (Exception e) {
+            logger.error("Ошибка при получении заявок на модерацию", e);
             return Collections.emptyMap();
         }
-
     }
 
     public List<ModerationDto> getStoresForModer() {
@@ -79,8 +78,8 @@ public class ModerationRequestService {
 
     @Transactional
     @Caching(evict = {
-        @CacheEvict(value = "storeAll", allEntries = true),
-        @CacheEvict(value = "store", key = "#id")
+            @CacheEvict(value = "storeAll", allEntries = true),
+            @CacheEvict(value = "store", key = "#id")
     })
     public HashMap<String, String> changeStoreStatus(Long id, ModerationRequestDto moderationDTO) {
 
@@ -95,7 +94,7 @@ public class ModerationRequestService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Запрос на модерацию не найден " + id));
 
         store.setStatus(moderationDTO.getStatus());
-        store.getUser().setRole(moderationDTO.getStatus() == Store.StoreStatus.ACTIVE ? User.Role.SELLER : User.Role.BUYER);
+        store.getUser().setRole(moderationDTO.getStatus().equals(Store.StoreStatus.ACTIVE) ? User.Role.SELLER : User.Role.BUYER);
 
         moderationRequest.setStatus(moderationDTO.getStatus());
 
