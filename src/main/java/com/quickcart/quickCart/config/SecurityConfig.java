@@ -28,7 +28,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/**",
                                 "/api/v1/users/**",
                                 "/api/v1/store/all/store",
-                                "api/v1/store/{id}",
+                                "/api/v1/store/{id}",
                                 "/api/v1/store/storeLogo/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
@@ -39,9 +39,7 @@ public class SecurityConfig {
 //                .formLogin(form -> form.loginPage("/api/v1/users/login"));
                 .formLogin(AbstractHttpConfigurer::disable);
 
-        http.csrf(csrf -> csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .disable());
+        http.csrf(AbstractHttpConfigurer::disable);
 
         http.cors(cors -> cors.configurationSource(request -> {
             CorsConfiguration config = new CorsConfiguration();
