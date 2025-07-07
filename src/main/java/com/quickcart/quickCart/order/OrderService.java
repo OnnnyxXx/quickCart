@@ -39,16 +39,18 @@ public class OrderService {
     UserRepository userRepository;
     ProductService productService;
 
+
     OrderProductRepository orderProductRepository;
     StoreService storeService;
 
-    public OrderService(OrderProductRepository productRepository, OrderRepository orderRepository, UserService userService, UserRepository userRepository, ProductService productService, StoreService storeService){
+    public OrderService(OrderProductRepository orderProductRepository, OrderRepository orderRepository, UserService userService, UserRepository userRepository, ProductService productService, StoreService storeService){
         super();
         this.orderRepository = orderRepository;
         this.userService = userService;
         this.userRepository = userRepository;
         this.productService = productService;
-        this.orderProductRepository = productRepository;
+
+        this.orderProductRepository = orderProductRepository;
         this.storeService = storeService;
     }
 
@@ -73,7 +75,7 @@ public class OrderService {
                 listProduct = mapProducts.get(storeId);
                 listProduct.add(product);
             }
-            else {
+            else{
                 listProduct = new ArrayList<>();
                 listProduct.add(product);
                 mapProducts.put(storeId, listProduct);
@@ -90,7 +92,15 @@ public class OrderService {
                 OrderProduct orderProduct = new OrderProduct();
                 Product product = productService.getProduct(item.getId());
                 orderProduct.setProduct(product);
-                orderProduct.setQuantity(item.getQuantity());
+                if(product.getStock() >= item.getQuantity()){
+                    product.setStock(product.getStock() - item.getQuantity());
+                    orderProduct.setQuantity(item.getQuantity());
+                }
+                else{
+                    orderProduct.setQuantity(product.getStock());
+                    product.setStock(0);
+                }
+                productService.setProduct(product.getId(), product);
                 orderProduct = productService.createOrderProduct(orderProduct);
                 return orderProduct;
             }).toList();

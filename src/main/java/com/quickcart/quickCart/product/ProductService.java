@@ -130,6 +130,13 @@ public class ProductService {
         ProductDTO productDTO = getProductDTO(product.get());
         return productDTO;
     }
+
+    @CacheEvict(value = "product", key = "#id")
+    @Transactional
+    public void setProduct(Long id, Product product){
+        productRepository.save(product);
+    }
+
     @CacheEvict(value = "product", key = "#id")
     @Transactional
     public HashMap<String, String> updateProductById(Long id, ProductDTO updateProduct, MultipartFile image) {
