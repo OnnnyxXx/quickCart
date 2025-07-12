@@ -1,9 +1,9 @@
 package com.quickcart.quickCart.auth;
 
+import com.quickcart.quickCart.auth.dto.SignupRequest;
 import com.quickcart.quickCart.user.User;
 import com.quickcart.quickCart.user.UserRepository;
 import com.quickcart.quickCart.auth.dto.LoginRequest;
-import com.quickcart.quickCart.auth.dto.UserDto;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,7 +20,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 @Service
@@ -30,7 +29,6 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
@@ -39,23 +37,17 @@ public class AuthService {
     }
 
     @Transactional
-    public void registerUser(UserDto userDTO) {
+    public void registerUser(SignupRequest signupRequest) {
         User user = new User();
-        user.setUsername(userDTO.getUsername());
-        user.setEmail(userDTO.getEmail());
-        user.setLocation(userDTO.getLocation());
+        user.setUsername(signupRequest.getUsername());
+        user.setEmail(signupRequest.getEmail());
         user.setRating(0);
-
-        if (userDTO.getRole() == null) {
-            user.setRole(User.Role.BUYER);
-        } else {
-            user.setRole(userDTO.getRole());
-        }
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setRole(User.Role.BUYER);
+        user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
         userRepository.save(user);
     }
 
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request,
+    public ResponseEntity<String> login(LoginRequest loginRequest, HttpServletRequest request,
                                         HttpServletResponse response) {
         try {
             Authentication authenticationRequest =
@@ -70,8 +62,9 @@ public class AuthService {
 
             // Установка cookie
             Cookie cookie = new Cookie("sessionId", session.getId());
-            cookie.setHttpOnly(true);
             cookie.setPath("/");
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
             response.addCookie(cookie);
 
             return new ResponseEntity<>("Пользователь успешно вошел в систему!.", HttpStatus.OK);
