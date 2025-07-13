@@ -1,5 +1,6 @@
 package com.quickcart.quickCart.auth;
 
+import com.quickcart.quickCart.auth.dto.LoginResponse;
 import com.quickcart.quickCart.auth.dto.SignupRequest;
 import com.quickcart.quickCart.user.User;
 import com.quickcart.quickCart.user.UserRepository;
@@ -21,17 +22,28 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
+import static com.quickcart.quickCart.auth.dto.LoginResponse.convertUserToLoginResponse;
+
 
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final AuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                       AuthenticationManager authenticationManager) {
+    public AuthService(
+            UserRepository userRepository,
+            AuthRepository authRepository,
+            PasswordEncoder passwordEncoder,
+            AuthenticationManager authenticationManager
+    ) {
         this.userRepository = userRepository;
+        this.authRepository = authRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
     }
@@ -47,9 +59,15 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public ResponseEntity<String> login(LoginRequest loginRequest, HttpServletRequest request,
-                                        HttpServletResponse response) {
+    public ResponseEntity<String> login(
+            LoginRequest loginRequest,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
         try {
+            Optional<User> userResponse = authRepository.findLoginResponseByEmail(loginRequest.getEmail());
+            LoginResponse loginResponse = convertUserToLoginResponse(userResponse.get());
+
             Authentication authenticationRequest =
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
 
@@ -62,18 +80,23 @@ public class AuthService {
 
             // Установка cookie
             Cookie cookie = new Cookie("sessionId", session.getId());
+            String sessionId = (" sessionId = %s").formatted(session.getId());
             cookie.setPath("/");
             cookie.setHttpOnly(true);
             cookie.setSecure(true);
             response.addCookie(cookie);
 
-            return new ResponseEntity<>("Пользователь успешно вошел в систему!.", HttpStatus.OK);
-        } catch (AuthenticationException e) {
+            String userInfoResponse = loginResponse + sessionId;
+            return new ResponseEntity<>(userInfoResponse, HttpStatus.OK);
+        } catch (AuthenticationException | NoSuchElementException e) {
             return new ResponseEntity<>("Неверный адрес электронной почты или пароль.", HttpStatus.BAD_REQUEST);
         }
     }
 
-    public void logout(HttpServletRequest request, HttpServletResponse response) {
+    public void logout(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
         boolean isSecure = false;
         String contextPath = null;
         if (request != null) {
