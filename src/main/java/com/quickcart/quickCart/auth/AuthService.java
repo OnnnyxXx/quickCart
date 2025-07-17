@@ -15,14 +15,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static com.quickcart.quickCart.auth.dto.LoginResponse.convertUserToLoginResponse;
@@ -59,38 +58,36 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public ResponseEntity<String> login(
+    public ResponseEntity<LoginResponse> login(
             LoginRequest loginRequest,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        try {
-            Optional<User> userResponse = authRepository.findLoginResponseByEmail(loginRequest.getEmail());
-            LoginResponse loginResponse = convertUserToLoginResponse(userResponse.get());
+        Optional<User> userResponse = authRepository.findLoginResponseByEmail(loginRequest.getEmail());
 
-            Authentication authenticationRequest =
-                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
-
-            Authentication authenticationResponse = this.authenticationManager.authenticate(authenticationRequest);
-
-            SecurityContextHolder.getContext().setAuthentication(authenticationResponse);
-
-            HttpSession session = request.getSession();
-            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-
-            // Установка cookie
-            Cookie cookie = new Cookie("sessionId", session.getId());
-            String sessionId = (" sessionId = %s").formatted(session.getId());
-            cookie.setPath("/");
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            response.addCookie(cookie);
-
-            String userInfoResponse = loginResponse + sessionId;
-            return new ResponseEntity<>(userInfoResponse, HttpStatus.OK);
-        } catch (AuthenticationException | NoSuchElementException e) {
-            return new ResponseEntity<>("Неверный адрес электронной почты или пароль.", HttpStatus.BAD_REQUEST);
+        if (userResponse.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неверный адрес электронной почты или пароль.");
         }
+
+        LoginResponse loginResponse = convertUserToLoginResponse(userResponse.get());
+        Authentication authenticationRequest =
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
+
+        Authentication authenticationResponse = this.authenticationManager.authenticate(authenticationRequest);
+
+        SecurityContextHolder.getContext().setAuthentication(authenticationResponse);
+
+        HttpSession session = request.getSession();
+        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+
+        // Установка cookie
+        Cookie cookie = new Cookie("sessionId", session.getId());
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        response.addCookie(cookie);
+
+        return new ResponseEntity<>(loginResponse, HttpStatus.OK);
     }
 
     public void logout(
