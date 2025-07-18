@@ -1,5 +1,6 @@
 package com.quickcart.quickCart.auth;
 
+import com.quickcart.quickCart.auth.dto.LoginResponse;
 import com.quickcart.quickCart.auth.dto.SignupRequest;
 import com.quickcart.quickCart.user.UserRepository;
 import com.quickcart.quickCart.auth.dto.LoginRequest;
@@ -25,13 +26,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest,
-                                        HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest,
+                                               HttpServletRequest request, HttpServletResponse response) {
         return authService.login(loginRequest, request, response);
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
+    public ResponseEntity<String> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
         if (userRepository.findByEmail(signupRequest.getEmail()).isPresent()) {
             return new ResponseEntity<>("Электронная почта уже используется.", HttpStatus.CONFLICT);
         }
