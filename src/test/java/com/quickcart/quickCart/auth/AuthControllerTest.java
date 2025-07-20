@@ -34,7 +34,6 @@ public class AuthControllerTest {
         userRepository.deleteAll();
     }
 
-
     @Test
     @Order(1)
     public void registerUser() throws Exception {
@@ -92,6 +91,36 @@ public class AuthControllerTest {
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
                 .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    public void loginError() throws Exception {
+        // Регистрация пользователя
+        String signupRequest = """
+                {
+                    "username": "Test",
+                    "password": "29=417|KL?_@*",
+                    "email": "t@gmail.com",
+                    "location": "Moscow"
+                }""";
+
+        mockMvc.perform(post("/api/v1/auth/signup")
+                        .content(signupRequest)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        // Попытка входа
+        String loginRequest = """
+                {
+                    "email": "",
+                    "password": ""
+                }""";
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .content(loginRequest)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
                 .andDo(print());
     }
 }
