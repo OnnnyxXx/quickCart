@@ -240,4 +240,9 @@ public class StoreService {
         return updatedFields;
     }
 
+    public Store getStoreById(Long storeId) {
+        Store store = storeRepository.findById(storeId).orElseThrow(() ->new ResponseStatusException(HttpStatus.NOT_FOUND, "Магазин с id " + storeId + " не найден."));
+        return store;
+    }
+
 }
