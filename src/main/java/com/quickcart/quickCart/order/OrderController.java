@@ -17,8 +17,11 @@ import java.util.List;
 @RequestMapping("/api/v1/orders")
 public class OrderController {
 
-    @Autowired
-    OrderService orderService;
+    private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     @PostMapping("/")
     public ResponseEntity<List<OrderDTO>> createOrder(@ModelAttribute @Valid OrderDTO orderDTO){

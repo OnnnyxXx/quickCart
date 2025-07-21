@@ -27,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @EnableCaching
@@ -38,12 +39,10 @@ public class OrderService {
     UserService userService;
     UserRepository userRepository;
     ProductService productService;
-
-
     OrderProductRepository orderProductRepository;
     StoreService storeService;
 
-    public OrderService(OrderProductRepository orderProductRepository, OrderRepository orderRepository, UserService userService, UserRepository userRepository, ProductService productService, StoreService storeService){
+    public OrderService(OrderProductRepository orderProductRepository, OrderRepository orderRepository, UserService userService, UserRepository userRepository, ProductService productService, StoreService storeService) {
         super();
         this.orderRepository = orderRepository;
         this.userService = userService;
@@ -54,8 +53,9 @@ public class OrderService {
         this.storeService = storeService;
     }
 
-    public List<ProductWithQuantityDTO> parseProducts(String productsString){
-        return new Gson().fromJson(productsString, new TypeToken<List<ProductWithQuantityDTO>>() {}.getType());
+    public List<ProductWithQuantityDTO> parseProducts(String productsString) {
+        return new Gson().fromJson(productsString, new TypeToken<List<ProductWithQuantityDTO>>() {
+        }.getType());
 
     }
 
@@ -68,21 +68,20 @@ public class OrderService {
         List<ProductWithQuantityDTO> productDTOList = parseProducts(productsString);
 
         HashMap<Long, List<ProductWithQuantityDTO>> mapProducts = new HashMap<>();
-        for(ProductWithQuantityDTO product: productDTOList){
+        for (ProductWithQuantityDTO product : productDTOList) {
             long storeId = product.getStoreId();
             List<ProductWithQuantityDTO> listProduct;
-            if(mapProducts.containsKey(storeId)){
+            if (mapProducts.containsKey(storeId)) {
                 listProduct = mapProducts.get(storeId);
                 listProduct.add(product);
-            }
-            else{
+            } else {
                 listProduct = new ArrayList<>();
                 listProduct.add(product);
                 mapProducts.put(storeId, listProduct);
             }
         }
         List<OrderDTO> orderDTOList = new ArrayList<>();
-        for(Long key: mapProducts.keySet()){
+        for (Long key : mapProducts.keySet()) {
             Order order = new Order();
             Store store = storeService.getStoreById(key);
             order.setStore(store);
@@ -92,15 +91,15 @@ public class OrderService {
                 OrderProduct orderProduct = new OrderProduct();
                 Product product = productService.getProduct(item.getId());
                 orderProduct.setProduct(product);
-                if(product.getStock() >= item.getQuantity()){
+                if (product.getStock() >= item.getQuantity()) {
                     product.setStock(product.getStock() - item.getQuantity());
                     orderProduct.setQuantity(item.getQuantity());
-                }
-                else{
+                } else {
                     orderProduct.setQuantity(product.getStock());
                     product.setStock(0);
                 }
                 productService.setProduct(product.getId(), product);
+
                 orderProduct = productService.createOrderProduct(orderProduct);
                 return orderProduct;
             }).toList();
@@ -111,6 +110,7 @@ public class OrderService {
             Order savedOrder = orderRepository.save(order);
             orderDTOList.add(new OrderDTO(savedOrder));
         }
+
         return orderDTOList;
     }
 
@@ -119,10 +119,10 @@ public class OrderService {
         return getOrdersDTO(orderList);
     }
 
-    public List<OrderDTO> getOrdersDTO(List<Order> orderList){
+    public List<OrderDTO> getOrdersDTO(List<Order> orderList) {
         List<OrderDTO> dtoList = new ArrayList<>();
         OrderDTO currentDTO;
-        for(Order order: orderList){
+        for (Order order : orderList) {
             currentDTO = new OrderDTO(
                     order.getId(),
                     order.getUser().getId(),
@@ -155,7 +155,7 @@ public class OrderService {
             @CacheEvict(value = "orderByStore", allEntries = true),
             @CacheEvict(value = "order", key = "#id")
     })
-    public String updateOrderStatus(Long id, Order.OrderStatus status){
+    public String updateOrderStatus(Long id, Order.OrderStatus status) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Заказ с " + id + " не найден."));
         order.setStatus(status);
