@@ -109,7 +109,8 @@ public class ProductService {
     }
 
     public Product getProduct(Long id) {
-        return productRepository.findById(id).get();
+        Optional<Product> product = productRepository.findById(id);
+        return product.orElse(null);
     }
 
     public static ProductDTO getProductDTO(Product product) {
@@ -153,9 +154,8 @@ public class ProductService {
     @Cacheable(value = "product", key = "#id")
     public ProductDTO getProductById(Long id) {
         Optional<Product> product = productRepository.findById(id);
-        if (product == null) return null;
-        ProductDTO productDTO = getProductDTO(product.get());
-        return productDTO;
+        return product.map(ProductService::getProductDTO)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Продукт не найден"));
     }
 
     @Caching(evict = {
@@ -195,7 +195,7 @@ public class ProductService {
 
         if (updateProduct.getPrice() != null) {
             product.setPrice(new BigDecimal(updateProduct.getPrice()));
-            updatedFields.put("price", updateProduct.getPrice().toString());
+            updatedFields.put("price", updateProduct.getPrice());
         }
 
         if (updateProduct.getStock() > 0) {
@@ -236,6 +236,7 @@ public class ProductService {
             }
 
             String originalFileName = image.getOriginalFilename();
+            assert originalFileName != null;
             String sanitizedFileName = originalFileName.replaceAll("[^a-zA-Z0-9.]", "_");
             String fileName = sanitizedFileName + "_" + UUID.randomUUID() + "." + formatName;
 
@@ -282,7 +283,6 @@ public class ProductService {
 
     @Transactional
     public OrderProduct createOrderProduct(OrderProduct orderProduct) {
-        OrderProduct savedProduct = orderProductRepository.save(orderProduct);
-        return savedProduct;
+        return orderProductRepository.save(orderProduct);
     }
 }

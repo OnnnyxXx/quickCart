@@ -23,7 +23,7 @@ public class Product {
     private String description;
 
     @NotNull
-    @DecimalMin(value = "0.0", inclusive = true)
+    @DecimalMin(value = "0.0")
     private BigDecimal price;
 
     @Min(0)
