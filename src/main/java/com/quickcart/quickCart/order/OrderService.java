@@ -8,7 +8,6 @@ import com.quickcart.quickCart.store.Store;
 import com.quickcart.quickCart.store.StoreService;
 import com.quickcart.quickCart.user.User;
 import com.quickcart.quickCart.user.UserRepository;
-import com.quickcart.quickCart.user.UserService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
@@ -34,21 +33,20 @@ public class OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
 
-    OrderRepository orderRepository;
-    UserService userService;
-    UserRepository userRepository;
-    ProductService productService;
-    OrderProductRepository orderProductRepository;
-    StoreService storeService;
+    private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
+    private final ProductService productService;
+    private final StoreService storeService;
 
-    public OrderService(OrderProductRepository orderProductRepository, OrderRepository orderRepository, UserService userService, UserRepository userRepository, ProductService productService, StoreService storeService) {
+    public OrderService(
+            OrderRepository orderRepository,
+            UserRepository userRepository,
+            ProductService productService,
+            StoreService storeService) {
         super();
         this.orderRepository = orderRepository;
-        this.userService = userService;
         this.userRepository = userRepository;
         this.productService = productService;
-
-        this.orderProductRepository = orderProductRepository;
         this.storeService = storeService;
     }
 

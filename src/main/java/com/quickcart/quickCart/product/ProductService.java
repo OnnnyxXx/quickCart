@@ -5,7 +5,6 @@ import com.quickcart.quickCart.store.Store;
 import com.quickcart.quickCart.store.StoreService;
 
 import com.quickcart.quickCart.product.dto.ProductDTO;
-import com.quickcart.quickCart.user.UserService;
 import jakarta.transaction.Transactional;
 
 import org.slf4j.Logger;
@@ -44,7 +43,7 @@ public class ProductService {
     private final OrderProductRepository orderProductRepository;
     private final StoreService storeService;
 
-    public ProductService(OrderProductRepository orderProductRepository, ProductRepository productRepository, UserService userService, StoreService storeService) {
+    public ProductService(OrderProductRepository orderProductRepository, ProductRepository productRepository, StoreService storeService) {
         super();
         this.productRepository = productRepository;
         this.orderProductRepository = orderProductRepository;

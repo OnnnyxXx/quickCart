@@ -31,7 +31,7 @@ public class ProductController {
     }
 
     @GetMapping("/get/all/products")
-    public List<ProductDTO> getAllProducts(){
+    public List<ProductDTO> getAllProducts() {
         return productService.getAllProducts();
     }
 
@@ -58,10 +58,11 @@ public class ProductController {
     }
 
     @PatchMapping("/product/{id}")
-    @PreAuthorize("@storeSecurityService.isOwner(#storeId, authentication.name)")
+    @PreAuthorize("@productSecurityService.isOwnerProduct(#id, authentication.name)")
     public ResponseEntity<HashMap<String, String>> updateProduct(@PathVariable("id") Long id,
                                                                  @ModelAttribute @Valid ProductDTO productDTO,
                                                                  @RequestParam(required = false) MultipartFile image) {
-        return ResponseEntity.ok(productService.updateProductById(id, productDTO, image));
+        HashMap<String, String> result = productService.updateProductById(id, productDTO, image);
+        return ResponseEntity.ok(result);
     }
 }
