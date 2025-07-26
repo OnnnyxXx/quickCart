@@ -4,6 +4,7 @@ import com.quickcart.quickCart.order.Order;
 import com.quickcart.quickCart.store.Store;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,9 +23,12 @@ public class Product {
     private String description;
 
     @NotNull
-    @DecimalMin(value = "0.0", inclusive = true)
+    @DecimalMin(value = "0.0")
     private BigDecimal price;
+
+    @Min(0)
     private int stock; // Количество на складе
+
     private String imageUrl;
     private String category;
 
