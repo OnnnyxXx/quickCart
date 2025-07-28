@@ -75,22 +75,6 @@ public class StoreControllerTest {
     }
 
     @Test
-    public void registerStoreError() throws Exception {
-        mockMvc.perform(post("/api/v1/store/register")
-                        .param("users", """
-                                {
-                                    "username": "Test",
-                                    "email": "t@gmail.com",
-                                    "location": "Moscow"
-                                }""")
-                        .param("name", "X")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
-                .andExpect(status().is4xxClientError())
-                .andDo(print());
-    }
-
-    @Test
     public void myStore() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/v1/store/my/store")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -121,16 +105,6 @@ public class StoreControllerTest {
     }
 
     @Test
-    public void updateStoreError() throws Exception {
-        mockMvc.perform(patch("/api/v1/store/update/" + storeId)
-                        .param("storeName", "1")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
-                .andExpect(status().is4xxClientError())
-                .andDo(print());
-    }
-
-    @Test
     public void storeDTO() throws Exception {
         myStore();
 
@@ -143,12 +117,37 @@ public class StoreControllerTest {
 
     @Test
     public void storeList() throws Exception {
-        mockMvc.perform(get("/api/v1/store/all/store")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
+        mockMvc.perform(get("/api/v1/store/all/store"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("[]"))
                 .andDo(print());
     }
 
+    /// <h1>--------------  NEGATIVE TEST --------------------</h1>
+
+    @Test
+    public void updateStoreError() throws Exception {
+        mockMvc.perform(patch("/api/v1/store/update/" + storeId)
+                        .param("storeName", "1")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
+                .andExpect(status().is4xxClientError())
+                .andDo(print());
+    }
+
+    @Test
+    public void registerStoreError() throws Exception {
+        mockMvc.perform(post("/api/v1/store/register")
+                        .param("users", """
+                                {
+                                    "username": "Test",
+                                    "email": "t@gmail.com",
+                                    "location": "Moscow"
+                                }""")
+                        .param("name", "X")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
+                .andExpect(status().is4xxClientError())
+                .andDo(print());
+    }
 }
