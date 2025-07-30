@@ -77,11 +77,17 @@ public class AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authenticationResponse);
 
-        HttpSession session = request.getSession();
-        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+        // Invalidate oldSession
+        HttpSession oldSession = request.getSession(false);
+        if (oldSession != null) {
+            oldSession.invalidate();
+        }
 
-        // Установка cookie
-        Cookie cookie = new Cookie("sessionId", session.getId());
+        HttpSession newSession = request.getSession(true);
+        newSession.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+
+        // Установка newSession
+        Cookie cookie = new Cookie("sessionId", newSession.getId());
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
