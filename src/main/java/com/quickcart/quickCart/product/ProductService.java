@@ -5,14 +5,13 @@ import com.quickcart.quickCart.store.Store;
 import com.quickcart.quickCart.store.StoreService;
 
 import com.quickcart.quickCart.product.dto.ProductDTO;
-import com.quickcart.quickCart.user.User;
-import com.quickcart.quickCart.user.UserService;
 import jakarta.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -32,36 +31,66 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @EnableCaching
 public class ProductService {
 
-    private static final Logger logger = LoggerFactory.getLogger(StoreService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
-    final private ProductRepository productRepository;
+    private final ProductRepository productRepository;
+    private final OrderProductRepository orderProductRepository;
+    private final StoreService storeService;
 
-    final private OrderProductRepository orderProductRepository;
-    final private UserService userService;
-    final private StoreService storeService;
-
-    public ProductService(OrderProductRepository orderProductRepository, ProductRepository productRepository, UserService userService, StoreService storeService) {
+    public ProductService(OrderProductRepository orderProductRepository, ProductRepository productRepository, StoreService storeService) {
         super();
         this.productRepository = productRepository;
         this.orderProductRepository = orderProductRepository;
-        this.userService = userService;
         this.storeService = storeService;
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "product", allEntries = true),
+            @CacheEvict(value = "products", allEntries = true),
+            @CacheEvict(value = "productAll", allEntries = true)
+    })
     public ResponseEntity<Product> createProduct(ProductDTO productDTO, Long storeId) {
         Store store = storeService.getStoreById(storeId);
         Product product = getProduct(productDTO);
-        if(store != null) product.setStore(store);
+        if (store != null) product.setStore(store);
         else return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         Product savedProduct = productRepository.save(product);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
     }
+
+    @Cacheable(value = "productAll")
+    public List<ProductDTO> getAllProducts() {
+        /*
+            Получаю все продукты из базы
+         */
+        List<Product> product = productRepository.getAll();
+        return product.stream()
+                .map(this::convertProductToProductDTO)
+                .collect(Collectors.toList());
+    }
+
+    public ProductDTO convertProductToProductDTO(Product product) {
+        /*
+            Конвертирую продукт в ProductDTO
+         */
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.setStoreId(product.getStore().getId());
+        productDTO.setId(product.getId());
+        productDTO.setStock(product.getStock());
+        productDTO.setImageUrl(product.getImageUrl());
+        productDTO.setName(product.getName());
+        productDTO.setDescription(product.getDescription());
+        productDTO.setPrice(String.valueOf(product.getPrice()));
+        return productDTO;
+    }
+
     public Product getProduct(ProductDTO productDTO) {
         Product product = new Product();
 
@@ -78,13 +107,13 @@ public class ProductService {
         return product;
     }
 
-    public Product getProduct(Long id){
-        return productRepository.findById(id).get();
+    public Product getProduct(Long id) {
+        Optional<Product> product = productRepository.findById(id);
+        return product.orElse(null);
     }
-    public static ProductDTO getProductDTO(Product product){
+
+    public static ProductDTO getProductDTO(Product product) {
         ProductDTO productDTO = new ProductDTO();
-        productDTO.setId(product.getId());
-        productDTO.setStoreId(product.getStore().getId());
         productDTO.setName(product.getName());
         productDTO.setDescription(product.getDescription());
         productDTO.setCategory(product.getCategory());
@@ -94,7 +123,7 @@ public class ProductService {
         return productDTO;
     }
 
-    public static ProductWithQuantityDTO getProductWithQuantityDTO(OrderProduct orderProduct){
+    public static ProductWithQuantityDTO getProductWithQuantityDTO(OrderProduct orderProduct) {
         Product product = orderProduct.getProduct();
         ProductWithQuantityDTO productDTO = new ProductWithQuantityDTO();
         productDTO.setId(product.getId());
@@ -109,15 +138,13 @@ public class ProductService {
         return productDTO;
     }
 
-
-
     @Cacheable(value = "products", key = "#storeId")
     public List<ProductDTO> getProductsByStoreId(Long storeId) {
         Store store = storeService.getStoreById(storeId);
-        if(store == null) return null;
+        if (store == null) return null;
         List<Product> productList = store.getProducts();
         List<ProductDTO> productDTOList = new ArrayList<>();
-        for(Product product: productList){
+        for (Product product : productList) {
             productDTOList.add(getProductDTO(product));
         }
         return productDTOList;
@@ -126,18 +153,25 @@ public class ProductService {
     @Cacheable(value = "product", key = "#id")
     public ProductDTO getProductById(Long id) {
         Optional<Product> product = productRepository.findById(id);
-        if(product == null) return null;
-        ProductDTO productDTO = getProductDTO(product.get());
-        return productDTO;
+        return product.map(ProductService::getProductDTO)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Продукт не найден"));
     }
 
-    @CacheEvict(value = "product", key = "#id")
+    @Caching(evict = {
+            @CacheEvict(value = "product", allEntries = true),
+            @CacheEvict(value = "products", allEntries = true),
+            @CacheEvict(value = "productAll", allEntries = true)
+    })
     @Transactional
-    public void setProduct(Long id, Product product){
+    public void setProduct(Long id, Product product) {
         productRepository.save(product);
     }
 
-    @CacheEvict(value = "product", key = "#id")
+    @Caching(evict = {
+            @CacheEvict(value = "product", allEntries = true),
+            @CacheEvict(value = "products", allEntries = true),
+            @CacheEvict(value = "productAll", allEntries = true)
+    })
     @Transactional
     public HashMap<String, String> updateProductById(Long id, ProductDTO updateProduct, MultipartFile image) {
         Product product = productRepository.findById(id)
@@ -160,7 +194,7 @@ public class ProductService {
 
         if (updateProduct.getPrice() != null) {
             product.setPrice(new BigDecimal(updateProduct.getPrice()));
-            updatedFields.put("price", updateProduct.getPrice().toString());
+            updatedFields.put("price", updateProduct.getPrice());
         }
 
         if (updateProduct.getStock() > 0) {
@@ -201,6 +235,7 @@ public class ProductService {
             }
 
             String originalFileName = image.getOriginalFilename();
+            assert originalFileName != null;
             String sanitizedFileName = originalFileName.replaceAll("[^a-zA-Z0-9.]", "_");
             String fileName = sanitizedFileName + "_" + UUID.randomUUID() + "." + formatName;
 
@@ -246,8 +281,7 @@ public class ProductService {
     }
 
     @Transactional
-    public OrderProduct createOrderProduct(OrderProduct orderProduct){
-        OrderProduct savedProduct = orderProductRepository.save(orderProduct);
-        return savedProduct;
+    public OrderProduct createOrderProduct(OrderProduct orderProduct) {
+        return orderProductRepository.save(orderProduct);
     }
 }

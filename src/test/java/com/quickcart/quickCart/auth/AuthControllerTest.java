@@ -94,6 +94,25 @@ public class AuthControllerTest {
                 .andDo(print());
     }
 
+    /// <h1>--------------  NEGATIVE TEST --------------------</h1>
+
+    @Test
+    public void registerUserError() throws Exception {
+        String signupRequest = """
+                {
+                    "username": "Test",
+                    "password": "@*",
+                    "email": "gmail.com",
+                    "location": "----"
+                }""";
+
+        mockMvc.perform(post("/api/v1/auth/signup")
+                        .content(signupRequest)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
     @Test
     public void loginError() throws Exception {
         // Регистрация пользователя
@@ -121,6 +140,13 @@ public class AuthControllerTest {
                         .content(loginRequest)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
+    @Test
+    public void logoutError() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/logout"))
+                .andExpect(status().isForbidden())
                 .andDo(print());
     }
 }

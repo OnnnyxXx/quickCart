@@ -75,7 +75,7 @@ public class StoreService {
                 case PENDING:
                     logger.info("Заявка уже существует: {}", storeName);
                     throw new ResponseStatusException(HttpStatus.CONFLICT,
-                            "Попытка регистрации магазина с активной заявкой на модерацию" );
+                            "Попытка регистрации магазина с активной заявкой на модерацию");
                 default:
                     break; // Ничего не делаем, если статус не определён
             }
@@ -241,8 +241,8 @@ public class StoreService {
     }
 
     public Store getStoreById(Long storeId) {
-        Store store = storeRepository.findById(storeId).orElseThrow(() ->new ResponseStatusException(HttpStatus.NOT_FOUND, "Магазин с id " + storeId + " не найден."));
-        return store;
+        return storeRepository.findById(storeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Магазин с id " + storeId + " не найден."));
     }
 
 }

@@ -2,23 +2,21 @@ package com.quickcart.quickCart.order;
 
 import com.quickcart.quickCart.order.dto.OrderAnswerDTO;
 import com.quickcart.quickCart.order.dto.OrderDTO;
-import com.quickcart.quickCart.product.dto.ProductDTO;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.HashMap;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/orders")
 public class OrderController {
 
-    @Autowired
-    OrderService orderService;
+    private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     @PostMapping("/")
     public ResponseEntity<List<OrderDTO>> createOrder(@ModelAttribute @Valid OrderDTO orderDTO){
@@ -41,7 +39,7 @@ public class OrderController {
 
     @PatchMapping("/update/{id}")
     public ResponseEntity<String> updateOrderStatus(@PathVariable("id") Long id,
-                                                    @RequestParam(required = true) Order.OrderStatus status){
+                                                    @RequestParam Order.OrderStatus status){
         return ResponseEntity.ok(orderService.updateOrderStatus(id, status));
     }
 }

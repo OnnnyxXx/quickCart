@@ -2,8 +2,7 @@ package com.quickcart.quickCart;
 
 import com.quickcart.quickCart.user.User;
 import com.quickcart.quickCart.user.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +11,7 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -40,18 +40,18 @@ class QuickCartApplicationTests {
         userRepository.save(savedUser);
     }
 
-
     @Test
-    public void getUserByEmail() throws Exception {
-        mockMvc.perform(get("/api/v1/users/email/" + savedUser.getEmail()))
+    public void profileUser() throws Exception {
+        mockMvc.perform(get("/api/v1/users/profile/user")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.user("test@gmail.com")))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
 
-
     @Test
-    public void profileUser() throws Exception {
-        mockMvc.perform(get("/api/v1/users/profile/user"))
+    public void getUserByEmail() throws Exception {
+        mockMvc.perform(get("/api/v1/users/email/" + savedUser.getEmail()))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -64,13 +64,6 @@ class QuickCartApplicationTests {
     }
 
     @Test
-    public void getUserByIdError() throws Exception {
-        mockMvc.perform(get("/api/v1/users/21900000"))
-                .andExpect(status().isNotFound())
-                .andDo(print());
-    }
-
-    @Test
     public void patch() throws Exception {
         String patchNode = """
                 {
@@ -79,7 +72,7 @@ class QuickCartApplicationTests {
                 }""";
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/users/update/" + savedUser.getId())
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("test@gmail.com").password("7474712:L"))
                         .content(patchNode)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -87,7 +80,15 @@ class QuickCartApplicationTests {
                 .andDo(print());
     }
 
+    /// <h1>--------------  NEGATIVE TEST --------------------</h1>
 
+    @Test
+    public void profileUserError() throws Exception {
+        mockMvc.perform(get("/api/v1/users/profile/user")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isForbidden())
+                .andDo(print());
+    }
 
     @Test
     public void patchError() throws Exception {
@@ -98,10 +99,17 @@ class QuickCartApplicationTests {
                 }""";
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/users/update/2323")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(csrf())
                         .content(patchNode)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is4xxClientError())
+                .andExpect(status().isForbidden())
+                .andDo(print());
+    }
+
+    @Test
+    public void getUserByIdError() throws Exception {
+        mockMvc.perform(get("/api/v1/users/21900000"))
+                .andExpect(status().isNotFound())
                 .andDo(print());
     }
 }

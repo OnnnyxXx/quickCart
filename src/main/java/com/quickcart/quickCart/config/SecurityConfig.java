@@ -24,18 +24,27 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/v1/auth/**",
-                                "/api/v1/users/**",
+                                // auth
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/signup",
+                                // users
+                                "/api/v1/users/{id}",
+                                "/api/v1/users/email/{email}",
+                                // store
                                 "/api/v1/store/all/store",
                                 "/api/v1/store/{id}",
                                 "/api/v1/store/storeLogo/**",
+                                // product
+                                "/api/v1/get/all/products",
+                                "/api/v1/product/{id}",
+                                "/api/v1/product/productImage/**",
+                                // swagger
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui/index.html")
                         .permitAll()
                         .anyRequest().authenticated()
                 )
-//                .formLogin(form -> form.loginPage("/api/v1/users/login"));
                 .formLogin(AbstractHttpConfigurer::disable);
 
         http.csrf(AbstractHttpConfigurer::disable);
@@ -51,7 +60,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 
     @Bean
     public AuthenticationManager authManager(HttpSecurity http) throws Exception {
