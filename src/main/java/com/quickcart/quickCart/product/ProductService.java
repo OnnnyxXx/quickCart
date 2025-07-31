@@ -52,6 +52,7 @@ public class ProductService {
 
     @Transactional
     @Caching(evict = {
+            @CacheEvict(value = "store", key = "#storeId"),
             @CacheEvict(value = "product", allEntries = true),
             @CacheEvict(value = "products", allEntries = true),
             @CacheEvict(value = "productAll", allEntries = true)
@@ -158,7 +159,8 @@ public class ProductService {
     }
 
     @Caching(evict = {
-            @CacheEvict(value = "product", allEntries = true),
+            @CacheEvict(value = "store", key = "#id"),
+            @CacheEvict(value = "product", key = "#id"),
             @CacheEvict(value = "products", allEntries = true),
             @CacheEvict(value = "productAll", allEntries = true)
     })
@@ -168,7 +170,8 @@ public class ProductService {
     }
 
     @Caching(evict = {
-            @CacheEvict(value = "product", allEntries = true),
+            @CacheEvict(value = "store", key = "#id"),
+            @CacheEvict(value = "product", key = "#id"),
             @CacheEvict(value = "products", allEntries = true),
             @CacheEvict(value = "productAll", allEntries = true)
     })
