@@ -71,6 +71,7 @@ public class ProductService {
         /*
             Получаю все продукты из базы
          */
+        System.out.println("Вызываем получение продуктов");
         List<Product> product = productRepository.getAll();
         return product.stream()
                 .map(this::convertProductToProductDTO)
@@ -84,6 +85,7 @@ public class ProductService {
         ProductDTO productDTO = new ProductDTO();
         productDTO.setStoreId(product.getStore().getId());
         productDTO.setId(product.getId());
+        System.out.println(product.getId() + "->" +productDTO.getId());
         productDTO.setStock(product.getStock());
         productDTO.setImageUrl(product.getImageUrl());
         productDTO.setName(product.getName());
@@ -115,6 +117,7 @@ public class ProductService {
 
     public static ProductDTO getProductDTO(Product product) {
         ProductDTO productDTO = new ProductDTO();
+        productDTO.setId(product.getId());
         productDTO.setName(product.getName());
         productDTO.setDescription(product.getDescription());
         productDTO.setCategory(product.getCategory());
