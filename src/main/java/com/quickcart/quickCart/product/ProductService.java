@@ -115,6 +115,7 @@ public class ProductService {
 
     public static ProductDTO getProductDTO(Product product) {
         ProductDTO productDTO = new ProductDTO();
+        productDTO.setId(product.getId());
         productDTO.setName(product.getName());
         productDTO.setDescription(product.getDescription());
         productDTO.setCategory(product.getCategory());
