@@ -87,6 +87,7 @@ public class ProductService {
         productDTO.setStock(product.getStock());
         productDTO.setImageUrl(product.getImageUrl());
         productDTO.setName(product.getName());
+        productDTO.setCategory(product.getCategory());
         productDTO.setDescription(product.getDescription());
         productDTO.setPrice(String.valueOf(product.getPrice()));
         return productDTO;
@@ -113,17 +114,17 @@ public class ProductService {
         return product.orElse(null);
     }
 
-    public static ProductDTO getProductDTO(Product product) {
-        ProductDTO productDTO = new ProductDTO();
-        productDTO.setId(product.getId());
-        productDTO.setName(product.getName());
-        productDTO.setDescription(product.getDescription());
-        productDTO.setCategory(product.getCategory());
-        productDTO.setPrice(product.getPrice().toString());
-        productDTO.setStock(product.getStock());
-        productDTO.setImageUrl(product.getImageUrl());
-        return productDTO;
-    }
+//    public static ProductDTO getProductDTO(Product product) {
+//        ProductDTO productDTO = new ProductDTO();
+//        productDTO.setId(product.getId());
+//        productDTO.setName(product.getName());
+//        productDTO.setDescription(product.getDescription());
+//        productDTO.setCategory(product.getCategory());
+//        productDTO.setPrice(product.getPrice().toString());
+//        productDTO.setStock(product.getStock());
+//        productDTO.setImageUrl(product.getImageUrl());
+//        return productDTO;
+//    }
 
     public static ProductWithQuantityDTO getProductWithQuantityDTO(OrderProduct orderProduct) {
         Product product = orderProduct.getProduct();
@@ -147,7 +148,7 @@ public class ProductService {
         List<Product> productList = store.getProducts();
         List<ProductDTO> productDTOList = new ArrayList<>();
         for (Product product : productList) {
-            productDTOList.add(getProductDTO(product));
+            productDTOList.add(convertProductToProductDTO(product));
         }
         return productDTOList;
     }
@@ -155,7 +156,7 @@ public class ProductService {
     @Cacheable(value = "product", key = "#id")
     public ProductDTO getProductById(Long id) {
         Optional<Product> product = productRepository.findById(id);
-        return product.map(ProductService::getProductDTO)
+        return product.map(this::convertProductToProductDTO)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Продукт не найден"));
     }
 
