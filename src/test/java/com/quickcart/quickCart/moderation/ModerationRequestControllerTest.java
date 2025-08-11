@@ -146,12 +146,13 @@ public class ModerationRequestControllerTest {
     @Test
     @Order(5)
     public void changeOfStatus() throws Exception {
+        getStoresForModer();
         String moderationDTO = """
                 {
                     "status": "ACTIVE"
                 }""";
 
-        mockMvc.perform(patch("/api/v1/moderation/manage/store/1")
+        mockMvc.perform(patch("/api/v1/moderation/manage/store/" + storeId)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user(savedUser.getEmail())
                                 .authorities(new SimpleGrantedAuthority("MODER")))
@@ -179,12 +180,14 @@ public class ModerationRequestControllerTest {
     @Test
     @Order(7)
     public void changeOfStatusBlock() throws Exception {
+        getStoresForModer();
+
         String moderationDTO = """
                 {
                     "status": "BLOCKED"
                 }""";
 
-        mockMvc.perform(patch("/api/v1/moderation/manage/store/1")
+        mockMvc.perform(patch("/api/v1/moderation/manage/store/" + storeId)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user(savedUser.getEmail())
                                 .authorities(new SimpleGrantedAuthority("MODER")))
