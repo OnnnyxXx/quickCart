@@ -53,7 +53,13 @@ public class AuthService {
         user.setUsername(signupRequest.getUsername());
         user.setEmail(signupRequest.getEmail());
         user.setRating(0);
-        user.setRole(User.Role.BUYER);
+
+        User.Role role = signupRequest.getRole();
+        if (role == User.Role.SELLER) {
+            user.setRole(User.Role.SELLER);
+        } else {
+            user.setRole(User.Role.BUYER);
+        }
         user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
         userRepository.save(user);
     }
