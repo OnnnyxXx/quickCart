@@ -1,20 +1,26 @@
 package com.quickcart.quickCart.moderation;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quickcart.quickCart.user.User;
 import com.quickcart.quickCart.user.UserRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -26,7 +32,16 @@ public class ModerationRequestControllerTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
+    @AfterEach
+    public void cleanRedis() {
+        redisTemplate.getConnectionFactory().getConnection().flushDb();
+    }
+
     private User savedUser;
+    private Long storeId;
 
     @BeforeEach
     public void setup() {
@@ -112,23 +127,32 @@ public class ModerationRequestControllerTest {
     @Test
     @Order(4)
     public void getStoresForModer() throws Exception {
-        mockMvc.perform(get("/api/v1/moderation/manage/store")
+        MvcResult result = mockMvc.perform(get("/api/v1/moderation/manage/store")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user(savedUser.getEmail())
                                 .authorities(new SimpleGrantedAuthority("MODER"))))
                 .andExpect(status().isOk())
-                .andDo(print());
+                .andDo(print())
+                .andReturn();
+
+        String responseContent = result.getResponse().getContentAsString();
+        System.out.println("RESULT -> " + responseContent);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonNode = mapper.readTree(responseContent);
+
+        this.storeId = jsonNode.get(0).get("storeId").asLong();
     }
 
     @Test
     @Order(5)
     public void changeOfStatus() throws Exception {
+        getStoresForModer();
         String moderationDTO = """
                 {
                     "status": "ACTIVE"
                 }""";
 
-        mockMvc.perform(patch("/api/v1/moderation/manage/store/1")
+        mockMvc.perform(patch("/api/v1/moderation/manage/store/" + storeId)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user(savedUser.getEmail())
                                 .authorities(new SimpleGrantedAuthority("MODER")))
@@ -151,17 +175,19 @@ public class ModerationRequestControllerTest {
      * <h1>Clearing Redis Cache<h1/>
      * If you don't do this, then when you run the test again,
      * the noStoreList() endpoint will access the cache and cause an error in the logic.
-    */
+     */
 
     @Test
     @Order(7)
     public void changeOfStatusBlock() throws Exception {
+        getStoresForModer();
+
         String moderationDTO = """
                 {
                     "status": "BLOCKED"
                 }""";
 
-        mockMvc.perform(patch("/api/v1/moderation/manage/store/1")
+        mockMvc.perform(patch("/api/v1/moderation/manage/store/" + storeId)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user(savedUser.getEmail())
                                 .authorities(new SimpleGrantedAuthority("MODER")))
