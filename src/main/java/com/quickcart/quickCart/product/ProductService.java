@@ -114,18 +114,6 @@ public class ProductService {
         return product.orElse(null);
     }
 
-//    public static ProductDTO getProductDTO(Product product) {
-//        ProductDTO productDTO = new ProductDTO();
-//        productDTO.setId(product.getId());
-//        productDTO.setName(product.getName());
-//        productDTO.setDescription(product.getDescription());
-//        productDTO.setCategory(product.getCategory());
-//        productDTO.setPrice(product.getPrice().toString());
-//        productDTO.setStock(product.getStock());
-//        productDTO.setImageUrl(product.getImageUrl());
-//        return productDTO;
-//    }
-
     public static ProductWithQuantityDTO getProductWithQuantityDTO(OrderProduct orderProduct) {
         Product product = orderProduct.getProduct();
         ProductWithQuantityDTO productDTO = new ProductWithQuantityDTO();

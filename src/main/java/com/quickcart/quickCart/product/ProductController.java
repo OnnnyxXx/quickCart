@@ -1,6 +1,7 @@
 package com.quickcart.quickCart.product;
 
 import com.quickcart.quickCart.product.dto.ProductDTO;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.List;
 
+@Tag(name = "Product", description = "The Product API")
 @RestController
 @RequestMapping("/api/v1")
 public class ProductController {
