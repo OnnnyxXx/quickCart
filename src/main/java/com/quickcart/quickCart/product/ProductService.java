@@ -67,13 +67,17 @@ public class ProductService {
     }
 
     @Cacheable(value = "productAll")
-    public List<ProductDTO> getAllProducts() {
-        /*
-            Получаю все продукты из базы
-         */
+    public List<ProductDTO> getAllProducts(int limit) {
+        // получаю продукты у ACTIVE магазинов
         List<Product> product = productRepository.getAll();
+
+        // перемешиваю продукты
+        Collections.shuffle(product);
+
+        // вывод с лимитом
         return product.stream()
                 .map(this::convertProductToProductDTO)
+                .limit(limit)
                 .collect(Collectors.toList());
     }
 

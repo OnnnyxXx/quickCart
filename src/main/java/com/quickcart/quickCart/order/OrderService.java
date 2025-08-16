@@ -57,6 +57,7 @@ public class OrderService {
     }
 
     @Transactional
+    @CacheEvict(value = "productAll")
     public List<OrderDTO> createOrder(@Valid OrderDTO orderDTO) {
         long userId = orderDTO.getUserId();
         User user = userRepository.findById(userId)

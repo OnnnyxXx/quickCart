@@ -33,8 +33,8 @@ public class ProductController {
     }
 
     @GetMapping("/get/all/products")
-    public List<ProductDTO> getAllProducts() {
-        return productService.getAllProducts();
+    public List<ProductDTO> getAllProducts(@RequestParam(defaultValue = "30") int limit) {
+        return productService.getAllProducts(limit);
     }
 
     @GetMapping("/store/{storeId}/products")

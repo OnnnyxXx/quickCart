@@ -6,7 +6,9 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-
-    @Query(value = "SELECT * FROM products", nativeQuery = true)
+    // получаю продукты у ACTIVE магазинов
+    @Query(value = "SELECT p FROM Product p " +
+            "JOIN p.store s " +
+            "WHERE s.status='ACTIVE'")
     List<Product> getAll();
 }
