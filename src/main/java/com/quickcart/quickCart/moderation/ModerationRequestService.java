@@ -79,7 +79,8 @@ public class ModerationRequestService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "storeAll", allEntries = true),
-            @CacheEvict(value = "store", key = "#id")
+            @CacheEvict(value = "productAll", allEntries = true),
+            @CacheEvict(value = "store", key = "#id"),
     })
     public HashMap<String, String> changeStoreStatus(Long id, ModerationRequestDto moderationDTO) {
 
@@ -94,7 +95,9 @@ public class ModerationRequestService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Запрос на модерацию не найден " + id));
 
         store.setStatus(moderationDTO.getStatus());
-        store.getUser().setRole(moderationDTO.getStatus().equals(Store.StoreStatus.ACTIVE) ? User.Role.SELLER : User.Role.BUYER);
+        // todo: у модера и админа, роль не должна меняться, при смене статуса магазина
+        // возможно в будущем пригодиться ⬇
+        // store.getUser().setRole(moderationDTO.getStatus().equals(Store.StoreStatus.ACTIVE) ? User.Role.SELLER : User.Role.BUYER);
 
         moderationRequest.setStatus(moderationDTO.getStatus());
 
