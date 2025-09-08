@@ -61,4 +61,17 @@ public class OrderDTO {
         this.paymentMethod = order.getPaymentMethod();
     }
 
+    @Override
+    public String toString() {
+        return "OrderDTO{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", storeId=" + storeId +
+                ", products='" + products + '\'' +
+                ", deliveryAddress='" + deliveryAddress + '\'' +
+                ", paymentMethod='" + paymentMethod + '\'' +
+                ", orderDate='" + orderDate + '\'' +
+                ", status='" + status + '\'' +
+                '}';
+    }
 }
