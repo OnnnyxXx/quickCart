@@ -19,6 +19,16 @@ services:
     networks:
       - mynetwork
 
+  quick-front:
+    image: quick-front:latest
+    build: ../quickCartFront/quickfront/
+    restart: "no"
+    ports:
+      - "3000:3000"
+
+    networks:
+      - mynetwork
+
   redis:
     image: redis:8.0.2
     restart: "no"
