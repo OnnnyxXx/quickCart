@@ -9,6 +9,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // получаю продукты у ACTIVE магазинов
     @Query(value = "SELECT p FROM Product p " +
             "JOIN p.store s " +
-            "WHERE s.status='ACTIVE' AND p.stock > 0")
+            "WHERE s.status='ACTIVE' AND p.stock > 0 AND s.deleted = false")
     List<Product> getAll();
 }

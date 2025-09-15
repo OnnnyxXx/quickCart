@@ -33,7 +33,10 @@ public class Store {
     private String description;
 
     private String workingHours;
+
     private int rating;
+
+    private boolean deleted = false;
 
     @Enumerated(EnumType.STRING)
     private StoreStatus status = StoreStatus.PENDING;// Статус магазина (например, "активен", "на модерации", "заблокирован")

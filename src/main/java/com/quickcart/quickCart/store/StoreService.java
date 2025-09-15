@@ -245,4 +245,19 @@ public class StoreService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Магазин с id " + storeId + " не найден."));
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "storeAll", allEntries = true),
+            @CacheEvict(value = "store", key = "#id"),
+            @CacheEvict(value = "productAll", allEntries = true)
+    })
+    public void deleted(Long id) {
+        logger.info("Запрос на смену статуса id: {}", id);
+        Store store = storeRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ошибка"));
+
+        store.setDeleted(true);
+        storeRepository.save(store);
+        logger.info("Статус сменен для id: {}", id);
+    }
+
 }
