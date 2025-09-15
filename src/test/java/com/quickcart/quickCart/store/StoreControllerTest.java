@@ -137,7 +137,7 @@ public class StoreControllerTest {
     public void deletedStore() throws Exception {
         myStore();
 
-        mockMvc.perform(post("/api/v1/store/delete/" + storeId)
+        mockMvc.perform(delete("/api/v1/store/delete/" + storeId)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
                 .andExpect(status().isOk())
