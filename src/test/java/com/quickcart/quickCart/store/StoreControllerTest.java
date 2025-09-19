@@ -90,6 +90,7 @@ public class StoreControllerTest {
     }
 
     @Test
+    @Order(3)
     public void myStore() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/v1/store/my/store")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -107,6 +108,7 @@ public class StoreControllerTest {
     }
 
     @Test
+    @Order(4)
     public void updateStore() throws Exception {
         myStore();
 
@@ -120,6 +122,7 @@ public class StoreControllerTest {
     }
 
     @Test
+    @Order(5)
     public void storeDTO() throws Exception {
         myStore();
 
@@ -131,6 +134,20 @@ public class StoreControllerTest {
     }
 
     @Test
+    @Order(6)
+    public void deletedStore() throws Exception {
+        myStore();
+
+        mockMvc.perform(delete("/api/v1/store/delete/" + storeId)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+
+    @Test
+    @Order(7)
     public void storeList() throws Exception {
         mockMvc.perform(get("/api/v1/store/all/store"))
                 .andExpect(status().isOk())
@@ -141,6 +158,7 @@ public class StoreControllerTest {
     /// <h1>--------------  NEGATIVE TEST --------------------</h1>
 
     @Test
+    @Order(8)
     public void updateStoreError() throws Exception {
         mockMvc.perform(patch("/api/v1/store/update/" + storeId)
                         .param("storeName", "1")
@@ -151,6 +169,7 @@ public class StoreControllerTest {
     }
 
     @Test
+    @Order(9)
     public void registerStoreError() throws Exception {
         mockMvc.perform(post("/api/v1/store/register")
                         .param("users", """
@@ -162,6 +181,16 @@ public class StoreControllerTest {
                         .param("name", "X")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("t@gmail.com")))
+                .andExpect(status().is4xxClientError())
+                .andDo(print());
+    }
+
+    @Test
+    @Order(10)
+    public void deletedStoreError() throws Exception {
+        mockMvc.perform(delete("/api/v1/store/delete/2")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.user("t2@gmail.com")))
                 .andExpect(status().is4xxClientError())
                 .andDo(print());
     }

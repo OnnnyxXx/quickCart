@@ -240,6 +240,20 @@ public class StoreService {
         return updatedFields;
     }
 
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "storeAll", allEntries = true),
+            @CacheEvict(value = "store", key = "#id"),
+            @CacheEvict(value = "productAll", allEntries = true)
+    })
+    public void deleteStore(Long id) {
+        Store store = storeRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Магазин не найден " + id));
+        store.setStatus(Store.StoreStatus.DELETED);
+        storeRepository.save(store);
+        logger.info("Store with id: {} deleted", id);
+    }
+
     public Store getStoreById(Long storeId) {
         return storeRepository.findById(storeId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Магазин с id " + storeId + " не найден."));

@@ -67,4 +67,10 @@ public class StoreController {
         return ResponseEntity.ok(result);
     }
 
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("@storeSecurityService.isOwner(#id, authentication.name)")
+    public ResponseEntity<String> deleteStore(@PathVariable("id") Long id){
+        storeService.deleteStore(id);
+        return ResponseEntity.ok("Магазин удален");
+    }
 }

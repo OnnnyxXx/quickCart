@@ -50,7 +50,8 @@ public class Store {
     public enum StoreStatus {
         ACTIVE,
         PENDING,
-        BLOCKED
+        BLOCKED,
+        DELETED
     }
 
 
