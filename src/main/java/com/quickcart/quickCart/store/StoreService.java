@@ -243,7 +243,8 @@ public class StoreService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "storeAll", allEntries = true),
-            @CacheEvict(value = "store", key = "#id")
+            @CacheEvict(value = "store", key = "#id"),
+            @CacheEvict(value = "productAll", allEntries = true)
     })
     public void deleteStore(Long id) {
         Store store = storeRepository.findById(id)
