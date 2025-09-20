@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -37,11 +38,15 @@ import java.util.stream.Collectors;
 @EnableCaching
 public class ProductService {
 
+    @Value("${app.product.upload.path}")
+    private String productUploadPath;
+
     private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
     private final ProductRepository productRepository;
     private final OrderProductRepository orderProductRepository;
     private final StoreService storeService;
+
 
     public ProductService(OrderProductRepository orderProductRepository, ProductRepository productRepository, StoreService storeService) {
         super();
@@ -220,7 +225,6 @@ public class ProductService {
 
     public String saveImageAsWebP(MultipartFile image) {
         try {
-            String formatName = "webp"; // webp, png, jpg без .
             String contentType = image.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
                 throw new IllegalArgumentException("Файл должен быть изображением.");
@@ -232,23 +236,23 @@ public class ProductService {
             }
 
             String originalFileName = image.getOriginalFilename();
-            assert originalFileName != null;
-            String sanitizedFileName = originalFileName.replaceAll("[^a-zA-Z0-9.]", "_");
-            String fileName = sanitizedFileName + "_" + UUID.randomUUID() + "." + formatName;
+            String sanitizedFileName = originalFileName != null ? originalFileName.replaceAll("[^a-zA-Z0-9.]", "_") : "product_image";
+            String fileName = sanitizedFileName + "_" + UUID.randomUUID() + ".webp";
 
-            File outputDir = new File("src/main/resources/static/productImage/");
+            // Создаём директорию для продуктов
+            File outputDir = new File(productUploadPath);
             if (!outputDir.exists()) {
                 outputDir.mkdirs();
             }
 
             File outputFile = new File(outputDir, fileName);
-            ImageIO.write(bufferedImage, formatName, outputFile);
+            ImageIO.write(bufferedImage, "webp", outputFile);
 
             return fileName;
 
         } catch (IOException e) {
-            logger.error("Ошибка при сохранении логотипа в формате WebP", e);
-            throw new RuntimeException("Ошибка при сохранении логотипа в формате WebP", e);
+            logger.error("Ошибка при сохранении фото продукта в WebP", e);
+            throw new RuntimeException("Ошибка при сохранении фото продукта", e);
         } catch (IllegalArgumentException e) {
             logger.error("Ошибка при обработке изображения: {}", e.getMessage());
             throw e;
@@ -257,22 +261,26 @@ public class ProductService {
 
     public ResponseEntity<Resource> getImage(String imageName, boolean download) {
         try {
-            Path filePath = Paths.get("src/main/resources/static/productImage/" + imageName);
+            Path filePath = Paths.get(productUploadPath, imageName);
             Resource resource = new UrlResource(filePath.toUri());
 
             if (!resource.exists() || !resource.isReadable()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
 
+            String contentType = "image/webp";
+            MediaType mediaType = MediaType.parseMediaType(contentType);
+
             String contentDisposition = download
-                    ? "attachment; filename=\"" + resource.getFile() + "\""
+                    ? "attachment; filename=\"" + resource.getFilename() + "\""
                     : "inline; filename=\"" + resource.getFilename() + "\"";
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
-                    .contentType(MediaType.IMAGE_JPEG)
+                    .contentType(mediaType)
                     .body(resource);
         } catch (Exception e) {
+            logger.error("Ошибка при получении фото продукта: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

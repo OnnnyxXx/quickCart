@@ -35,3 +35,4 @@ build/
 ### Resources ###
 src/main/resources/static/storeLogo
 src/main/resources/static/productImage
+uploads

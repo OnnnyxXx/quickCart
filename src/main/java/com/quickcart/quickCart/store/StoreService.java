@@ -10,6 +10,7 @@ import com.quickcart.quickCart.user.UserRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -36,6 +37,9 @@ import java.util.*;
 
 @Service
 public class StoreService {
+
+    @Value("${app.upload.path}")
+    private String uploadPath;
 
     private static final Logger logger = LoggerFactory.getLogger(StoreService.class);
 
@@ -134,7 +138,8 @@ public class StoreService {
             String sanitizedFileName = originalFileName != null ? originalFileName.replaceAll("[^a-zA-Z0-9.]", "_") : "logo";
             String fileName = sanitizedFileName + "_" + UUID.randomUUID() + ".webp";
 
-            File outputDir = new File("src/main/resources/static/storeLogo/");
+            // Создаём директорию
+            File outputDir = new File(uploadPath);
             if (!outputDir.exists()) {
                 outputDir.mkdirs();
             }
@@ -155,12 +160,16 @@ public class StoreService {
 
     public ResponseEntity<Resource> getLogo(String imageName, boolean download) {
         try {
-            Path filePath = Paths.get("src/main/resources/static/storeLogo/" + imageName);
+            // Используем новый путь из конфига
+            Path filePath = Paths.get(uploadPath, imageName);
             Resource resource = new UrlResource(filePath.toUri());
 
             if (!resource.exists() || !resource.isReadable()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
+
+            String contentType = "image/webp";
+            MediaType mediaType = MediaType.parseMediaType(contentType);
 
             String contentDisposition = download
                     ? "attachment; filename=\"" + resource.getFilename() + "\""
@@ -168,7 +177,7 @@ public class StoreService {
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
-                    .contentType(MediaType.IMAGE_JPEG)
+                    .contentType(mediaType)
                     .body(resource);
         } catch (Exception e) {
             logger.error("Ошибка при получении логотипа: {}", e.getMessage());
