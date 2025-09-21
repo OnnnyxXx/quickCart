@@ -13,8 +13,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -220,7 +220,7 @@ public class ProductService {
 
     public String saveImageAsWebP(MultipartFile image) {
         try {
-            String formatName = "webp"; // webp, png, jpg без .
+            String formatName = "webp"; // Формат без точки
             String contentType = image.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
                 throw new IllegalArgumentException("Файл должен быть изображением.");
@@ -232,11 +232,13 @@ public class ProductService {
             }
 
             String originalFileName = image.getOriginalFilename();
-            assert originalFileName != null;
+            if (originalFileName == null) {
+                throw new IllegalArgumentException("Имя файла не может быть null.");
+            }
             String sanitizedFileName = originalFileName.replaceAll("[^a-zA-Z0-9.]", "_");
             String fileName = sanitizedFileName + "_" + UUID.randomUUID() + "." + formatName;
 
-            File outputDir = new File("src/main/resources/static/productImage/");
+            File outputDir = new File("/application/productImage/");
             if (!outputDir.exists()) {
                 outputDir.mkdirs();
             }
@@ -244,11 +246,12 @@ public class ProductService {
             File outputFile = new File(outputDir, fileName);
             ImageIO.write(bufferedImage, formatName, outputFile);
 
+            logger.info("Изображение продукта сохранено: {}", outputFile.getAbsolutePath());
             return fileName;
 
         } catch (IOException e) {
-            logger.error("Ошибка при сохранении логотипа в формате WebP", e);
-            throw new RuntimeException("Ошибка при сохранении логотипа в формате WebP", e);
+            logger.error("Ошибка при сохранении изображения продукта в формате WebP: {}", e.getMessage(), e);
+            throw new RuntimeException("Ошибка при сохранении изображения продукта в формате WebP", e);
         } catch (IllegalArgumentException e) {
             logger.error("Ошибка при обработке изображения: {}", e.getMessage());
             throw e;
@@ -257,22 +260,30 @@ public class ProductService {
 
     public ResponseEntity<Resource> getImage(String imageName, boolean download) {
         try {
-            Path filePath = Paths.get("src/main/resources/static/productImage/" + imageName);
-            Resource resource = new UrlResource(filePath.toUri());
+            Path filePath = Paths.get("/application/productImage/" + imageName);
+            Resource resource = new FileSystemResource(filePath);
 
             if (!resource.exists() || !resource.isReadable()) {
+                logger.warn("Изображение продукта не найдено: {}", imageName);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
 
             String contentDisposition = download
-                    ? "attachment; filename=\"" + resource.getFile() + "\""
+                    ? "attachment; filename=\"" + resource.getFile().getName() + "\""
                     : "inline; filename=\"" + resource.getFilename() + "\"";
 
+            MediaType mediaType = MediaType.IMAGE_JPEG;
+            if (imageName.toLowerCase().endsWith(".webp")) {
+                mediaType = MediaType.parseMediaType("image/webp");
+            }
+
+            logger.info("Изображение продукта получено: {}", filePath.toAbsolutePath());
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
-                    .contentType(MediaType.IMAGE_JPEG)
+                    .contentType(mediaType)
                     .body(resource);
         } catch (Exception e) {
+            logger.error("Ошибка при получении изображения продукта: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
