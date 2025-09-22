@@ -281,4 +281,18 @@ public class ProductService {
     public OrderProduct createOrderProduct(OrderProduct orderProduct) {
         return orderProductRepository.save(orderProduct);
     }
+
+    @Caching(evict = {
+            @CacheEvict(value = "store", key = "#id"),
+            @CacheEvict(value = "product", key = "#id"),
+            @CacheEvict(value = "products", allEntries = true),
+            @CacheEvict(value = "productAll", allEntries = true)
+    })
+    @Transactional
+    public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Товар с id " + id + " не найден."));
+        productRepository.deleteById(id);
+        logger.info("Product with id: {} deleted", id);
+    }
 }
