@@ -140,7 +140,7 @@ public class ProductService {
         List<Product> productList = store.getProducts();
         List<ProductDTO> productDTOList = new ArrayList<>();
         for (Product product : productList) {
-            productDTOList.add(convertProductToProductDTO(product));
+            if(product.getStock() >= 0) productDTOList.add(convertProductToProductDTO(product));
         }
         return productDTOList;
     }
@@ -292,7 +292,8 @@ public class ProductService {
     public void deleteProduct(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Товар с id " + id + " не найден."));
-        productRepository.deleteById(id);
+        product.setStock(-1);
+        productRepository.save(product);
         logger.info("Product with id: {} deleted", id);
     }
 }
