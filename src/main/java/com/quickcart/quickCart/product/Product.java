@@ -26,7 +26,7 @@ public class Product {
     @DecimalMin(value = "0.0")
     private BigDecimal price;
 
-    @Min(0)
+    @Min(-1)
     private int stock; // Количество на складе
 
     private String imageUrl;
