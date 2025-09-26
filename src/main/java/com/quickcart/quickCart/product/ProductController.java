@@ -67,4 +67,11 @@ public class ProductController {
         HashMap<String, String> result = productService.updateProductById(id, productDTO, image);
         return ResponseEntity.ok(result);
     }
+
+    @DeleteMapping("/product/{id}")
+    @PreAuthorize("@productSecurityService.isOwnerProduct(#id, authentication.name)")
+    public ResponseEntity<String> deleteProduct(@PathVariable("id") Long id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.ok("Продукт удален");
+    }
 }
