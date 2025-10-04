@@ -35,6 +35,10 @@ public class StoreDto {
     @Size(min = 3, max = 255)
     private String description;
 
+//    @NotBlank(message = "Телефон обязателен")
+//    @Size(min = 3, max = 255)
+    private String phone;
+
     private String workingHours;
 
     @Min(0)
@@ -50,13 +54,14 @@ public class StoreDto {
     public StoreDto() {}
 
     public StoreDto(Long userId, User user, String name,
-                    String location, String description, String workingHours,
+                    String location, String description, String phone, String workingHours,
                     int rating, Store.StoreStatus status, String logoUrl, MultipartFile logo) {
         this.userId = userId;
         this.user = user;
         this.name = name;
         this.location = location;
         this.description = description;
+        this.phone = phone;
         this.workingHours = workingHours;
         this.rating = rating;
         this.status = status;
@@ -64,24 +69,26 @@ public class StoreDto {
         this.logo = logo;
     }
 
-    public StoreDto(Long userId, String name, String location, String description,
+    public StoreDto(Long userId, String name, String location, String description, String phone,
                     String workingHours, int rating, Store.StoreStatus status, String logoUrl) {
         this.userId = userId;
         this.name = name;
         this.location = location;
         this.description = description;
+        this.phone = phone;
         this.workingHours = workingHours;
         this.rating = rating;
         this.status = status;
         this.logoUrl = logoUrl;
     }
 
-    public StoreDto(Long userId, Long id, String name, String location, String description, String workingHours, int rating, Store.StoreStatus status, String logoUrl) {
+    public StoreDto(Long userId, Long id, String name, String location, String description, String phone, String workingHours, int rating, Store.StoreStatus status, String logoUrl) {
         this.userId = userId;
         this.id = id;
         this.name = name;
         this.location = location;
         this.description = description;
+        this.phone = phone;
         this.workingHours = workingHours;
         this.rating = rating;
         this.status = status;

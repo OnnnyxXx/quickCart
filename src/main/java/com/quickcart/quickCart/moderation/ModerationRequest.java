@@ -35,6 +35,10 @@ public class ModerationRequest {
     @Size(max = 255)
     private String description;
 
+//    @NotBlank(message = "Phone is required")
+//    @Size(max = 255)
+    private String phone;
+
     @Column(updatable = false)
     private LocalDateTime requestDate = LocalDateTime.now();
 
@@ -44,14 +48,16 @@ public class ModerationRequest {
     public ModerationRequest() {
     }
 
-    public ModerationRequest(Long id, User user, String storeName, String logoUrl, String location, String description, LocalDateTime requestDate, Store.StoreStatus status) {
+    public ModerationRequest(Long id, User user, String storeName, String logoUrl, String location, String description, String phone, LocalDateTime requestDate, Store.StoreStatus status) {
         this.id = id;
         this.user = user;
         this.storeName = storeName;
         this.logoUrl = logoUrl;
         this.location = location;
         this.description = description;
+        this.phone = phone;
         this.requestDate = requestDate;
         this.status = status;
     }
+
 }

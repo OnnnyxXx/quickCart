@@ -92,6 +92,7 @@ public class StoreService {
         Store store = new Store();
         store.setName(storeDTO.getName());
         store.setDescription(storeDTO.getDescription());
+        store.setPhone(storeDTO.getPhone());
         store.setLocation(storeDTO.getLocation());
         store.setStatus(Store.StoreStatus.PENDING);
         store.setRating(0);
@@ -113,6 +114,7 @@ public class StoreService {
         moderationRequest.setLogoUrl(logo);
         moderationRequest.setLocation(storeDTO.getLocation());
         moderationRequest.setDescription(storeDTO.getDescription());
+        moderationRequest.setPhone(storeDTO.getPhone());
         moderationRequest.setRequestDate(LocalDateTime.now());
         moderationRequest.setStatus(Store.StoreStatus.PENDING);
         moderationRequestDao.save(moderationRequest);
@@ -212,6 +214,12 @@ public class StoreService {
             store.setDescription(withUserDto.getStoreDescription());
             updatedFields.put("description", withUserDto.getStoreDescription());
         }
+
+        if(withUserDto.getStorePhone() != null) {
+            store.setPhone(withUserDto.getStorePhone());
+            updatedFields.put("phone", withUserDto.getStorePhone());
+        }
+
         if (withUserDto.getStoreWorkingHours() != null) {
             store.setWorkingHours(withUserDto.getStoreWorkingHours());
             updatedFields.put("workingHours", withUserDto.getStoreWorkingHours());

@@ -32,6 +32,10 @@ public class Store {
     @Size(min = 3, max = 255)
     private String description;
 
+//    @NotBlank(message = "Phone is required")
+//    @Size(min = 3, max = 255)
+    private String phone;
+
     private String workingHours;
     private int rating;
 

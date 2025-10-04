@@ -18,6 +18,8 @@ public class StoreDtoUpdate {
     @Size(min = 3, max = 255)
     private String storeDescription;
 
+    private String storePhone;
+
     private String storeWorkingHours;
     private MultipartFile logo;
     private String storeUrlLogo;
@@ -25,11 +27,12 @@ public class StoreDtoUpdate {
     public StoreDtoUpdate() {
     }
 
-    public StoreDtoUpdate(Long userId, String storeName, String storeLocation, String storeDescription, String storeWorkingHours, MultipartFile logo, String storeUrlLogo) {
+    public StoreDtoUpdate(Long userId, String storeName, String storeLocation, String storeDescription, String storePhone, String storeWorkingHours, MultipartFile logo, String storeUrlLogo) {
         this.userId = userId;
         this.storeName = storeName;
         this.storeLocation = storeLocation;
         this.storeDescription = storeDescription;
+        this.storePhone = storePhone;
         this.storeWorkingHours = storeWorkingHours;
         this.logo = logo;
         this.storeUrlLogo = storeUrlLogo;
